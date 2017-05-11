@@ -1,0 +1,76 @@
+{
+	"clMainClass": {
+
+		"query": "vDescriptionOID",
+		"folder": "SNMP_Data",
+		"parse": [
+
+			{"expression": "cisco", "targetClass": "clCiscoClass"},
+			{"expression": "juniper", "targetClass": "clJuniperClass"}
+
+		],
+
+		"genericscript": "GenericDevice.json",
+
+		"clCiscoClass": {
+			
+			"query": "vDescriptionOID",
+			"folder": "cisco",
+			"parse": [
+
+				{"expression": "C\\d{4}.{,2} Software", "targetClass": "clSwitchClass"},
+				{"expression": " \\d{3,4} Software", "targetClass": "clRouterClass"}
+
+			],
+
+			"genericscript": "GenericCiscoDevice.json",
+
+
+			"clRouterClass": {
+
+				"folder": "router",
+				"genericscript": "GenericCiscoRouter.json"
+
+			},
+
+			"clSwitchClass": {
+
+				"folder": "switch",
+				"genericscript": "GenericCiscoSwitch.json"
+
+			}
+				
+		},
+
+		"clJuniperClass": {
+			
+			"query": "vDescriptionOID",
+			"folder": "juniper",
+			"parse": [
+
+				{"expression": "switch", "targetClass": "clSwitchClass"},
+				{"expression": "router", "targetClass": "clRouterClass"}
+
+			],
+
+			"genericscript": "GenericJuniperDevice.json",
+
+			"clRouterClass": {
+
+				"folder": "router",
+				"genericscript": "GenericJuniperRouter.json"
+
+			},
+
+			"clSwitchClass": {
+
+				"folder": "switch",
+				"genericscript": "GenericJuniperSwitch.json"
+
+			}
+
+		}
+
+	}
+
+}

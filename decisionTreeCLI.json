@@ -1,0 +1,76 @@
+{
+	"clMainClass": {
+
+		"query": "vShowVersion",
+		"folder": "CLI_Data",
+		"parse": [
+
+			{"expression": "cisco", "targetClass": "clCiscoClass"},
+			{"expression": "junos", "targetClass": "clJuniperClass"}
+
+		],
+
+		"genericscript": "GenericDevice.json",
+
+		"clCiscoClass": {
+			
+			"query": "vShowVersion",
+			"folder": "cisco",
+			"parse": [
+
+				{"expression": "ws-c", "targetClass": "clCatalystSwitchClass"},
+				{"expression": " \\d{3,4} Software", "targetClass": "clISRClass"}
+
+			],
+
+			"genericscript": "GenericCiscoDevice.json",
+
+
+			"clISRClass": {
+
+				"folder": "ISR",
+				"genericscript": "GenericCiscoISRRouter.json"
+
+			},
+
+			"clCatalystSwitchClass": {
+
+				"folder": "Catalyst",
+				"genericscript": "GenericCiscoCatalystSwitch.json"
+
+			}
+				
+		},
+
+		"clJuniperClass": {
+			
+			"query": "vShowVersion",
+			"folder": "juniper",
+			"parse": [
+
+				{"expression": "odel: mx.*", "targetClass": "clMXRouterClass"},
+				{"expression": "odel: ex.*", "targetClass": "clEXSwitchClass"}
+
+			],
+
+			"genericscript": "GenericJuniperDevice.json",
+
+			"clMXRouterClass": {
+
+				"folder": "MXRouter",
+				"genericscript": "GenericJuniperMXRouter.json"
+
+			},
+
+			"clEXSwitchClass": {
+
+				"folder": "EXSwitch",
+				"genericscript": "GenericJuniperEXSwitch.json"
+
+			}
+
+		}
+
+	}
+
+}

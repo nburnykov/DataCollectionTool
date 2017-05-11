@@ -1,0 +1,56 @@
+clMainClass:
+
+  clCiscoClass:
+
+
+
+    clRouterClass:
+
+      folder: router
+      genericscript: GenericCiscoRouter.json
+
+    clSwitchClass:
+
+      folder: switch
+      genericscript: GenericCiscoSwitch.json
+
+    folder: cisco
+    genericscript: GenericCiscoDevice.json
+
+    parse:
+
+    - expression: 'C\d{4}.{,2} Software'
+      targetClass: clSwitchClass
+
+    - expression: ' \d{3,4} Software'
+      targetClass: clRouterClass
+
+
+
+  clJuniperClass:
+
+    clRouterClass:
+
+      folder: router
+      genericscript: GenericJuniperRouter.json
+
+    clSwitchClass:
+      folder: switch
+      genericscript: GenericJuniperSwitch.json
+
+    folder: juniper
+    genericscript: GenericJuniperDevice.json
+
+    parse:
+
+    - {expression: switch, targetClass: clSwitchClass}
+    - {expression: router, targetClass: clRouterClass}
+
+    query: vDescriptionOID
+
+  folder: SNMP_Data
+  genericscript: GenericDevice.json
+  parse:
+  - {expression: cisco, targetClass: clCiscoClass}
+  - {expression: juniper, targetClass: clJuniperClass}
+  query: vDescriptionOID

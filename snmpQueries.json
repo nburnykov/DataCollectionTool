@@ -1,0 +1,6 @@
+{
+  	"snmpQuery": [
+        {"ID": "vDescriptionOID", "OID": "1.3.6.1.2.1.1.1.0", "type": "single"},
+		{"ID": "CiscoCDPNeighbors", "OID": "1.3.6.1.4.1.9.9.23", "type": "multiple"}
+	]
+}
