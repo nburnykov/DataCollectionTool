@@ -1,10 +1,11 @@
 import re
 import datetime
+from CLI.portScan import PortScan
 
 savedqueryresult = {}
 pathlist = []
 processlog=[]
-hostobj = {'host': '10.171.2.5', 'community': 'NTM'}
+hostobj = {'ip': '10.171.2.5', 'community': 'NTM'}
 
 
 def decisionTreeWalkCLI(dtree, currentclass, hostdata):
@@ -25,15 +26,23 @@ def decisionTreeWalkCLI(dtree, currentclass, hostdata):
 
         if q not in savedqueryresult:
             dtProcessLog("{} result is not found in cache, try to perform CLI command:".format(q))
-            dtProcessLog("      Host: {}".format(hostdata['host']))
+            dtProcessLog("      Host: {}".format(hostdata['ip']))
+            ps = PortScan(hostdata)
+            if ps.issshopen():
+                pass
+            elif ps.istelnetopen():
+                pass
+            else:
+                dtProcessLog("Telnet and SSH ports are closed. Exit")
+                return
             try:
 
                 queryoid = next(
                     query for query in snmpqueries['snmpQuery'] if query['ID'] == q)['OID']
-                queryres = snmpquery.getsnmpdata(hostdata['community'], hostdata['host'], queryoid)
+                queryres = snmpquery.getsnmpdata(hostdata['community'], hostdata['ip'], queryoid)
                 savedqueryresult[q] = queryres[1]
             except IOError:
-                dtProcessLog("Host {} is not found".format(hostdata['host']))
+                dtProcessLog("Host {} is not found".format(hostdata['ip']))
                 return
             except KeyError:
                 dtProcessLog("Key {} is not found".format(q))
@@ -74,6 +83,4 @@ def decisionTreeWalkCLI(dtree, currentclass, hostdata):
                      .format(dt['folder'], dt['genericscript']))
 
 
-decisionTreeWalkCLI(dtree, "clMainClass", hostobj)
 
-[print("time: {}, class: {}, message: {}".format(l1, l2, l3)) for (l1, l2, l3) in processlog]
