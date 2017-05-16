@@ -11,5 +11,5 @@ def loadjson(file='..\\decisionTreeSNMP.json'):
 
 s = loadjson()
 
-with open('sw_templates.yaml', 'w') as f:
+with open('decisionTreeCLI.yaml', 'w') as f:
     f.write(yaml.dump(s))

@@ -1,5 +1,5 @@
 from pysnmp.hlapi import *
-from JSONproc import jsonDecoder
+from confproc import jsonDecoder
 
 def getsnmpdata(community, host, oid, port=161):
     if oid['type'] == 'single':

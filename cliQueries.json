@@ -1,5 +1,5 @@
 {
   	"cliQuery": [
-        {"ID": "vShowVersion", "CLI": "show version; show system-information", "file": "sh_ver"}
+        {"ID": "vShowVersion", "CLI": "show version; show system-information"}
 	]
 }
