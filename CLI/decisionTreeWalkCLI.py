@@ -7,10 +7,8 @@ from CLI.deviceConnection import DeviceConnection
 class DecisionTreeWalkCLI:
     def __init__(self, hostdata, treedict, querydict):
         self.hostdata = hostdata
-        self.__treedict__ = treedict
         self.querydict = querydict
         self.__processlog__ = []
-        self.__currentclass__ = ''
         self.__savedqueryresult__ = {}
         self.__pathlist__ = []
 
@@ -26,19 +24,18 @@ class DecisionTreeWalkCLI:
             self.__processlogadd__("Telnet and SSH ports are closed. Exit")
             return
 
-        self.__currentclass__ = 'clMainClass'
-        self.__decisiontreewalk__()
+        self.__decisiontreewalk__('clMainClass', treedict)
 
-    def __processlogadd__(self, msg):
-        return self.__processlog__.append((str(datetime.datetime.now().time()), self.__currentclass__, msg))
+    def __processlogadd__(self, msg, cclass=''):
+        return self.__processlog__.append((str(datetime.datetime.now().time()), cclass, msg))
 
-    def __decisiontreewalk__(self):
+    def __decisiontreewalk__(self, currentclass, treedict):
 
-        if self.__currentclass__ not in self.__treedict__:
-            self.__processlogadd__("Target class {} is not found".format(self.__currentclass__))
+        if currentclass not in treedict:
+            self.__processlogadd__("Target class {} is not found".format(currentclass))
             return
 
-        dt = self.__treedict__[self.__currentclass__]
+        dt = treedict[currentclass]
         self.__pathlist__.append((dt['folder'], dt['genericscript']))
 
         if 'query' in dt:
@@ -49,7 +46,6 @@ class DecisionTreeWalkCLI:
                 self.__processlogadd__("{} result is not found in cache, performing CLI command:".format(q))
                 self.__processlogadd__("      Host: {}".format(hostdata['ip']))
 
-                # TODO parse cli queries
                 if q not in self.querydict:
                     self.__processlogadd__("Cannot find \"{}\" in queries list, check cliQueries.yaml")
                     return
@@ -59,14 +55,11 @@ class DecisionTreeWalkCLI:
                 for s in qlist:
                     output += self.__devconn__.runcommand(s)
 
-
-
+                # TODO handle write to file exceptions
                 with open(q+'.txt', 'w') as data_file:
                     data_file.write(output)
 
-
-
-                        # TODO perform parsed CLI queries and save data to dict and files
+                self.__savedqueryresult__[q] = output
 
             if 'parse' not in dt:
                 self.__processlogadd__("\"query\" section exists but \"parse\" is not presented, "
@@ -97,7 +90,7 @@ class DecisionTreeWalkCLI:
                 return
 
             for targetClass in targetClassList:
-                self.__decisiontreewalk__(dt, targetClass, self.hostdata)
+                self.__decisiontreewalk__(targetClass, dt)
 
         else:
             self.__processlogadd__("Query section is not presented, use current folder \"{}\" and script \"{}\""
