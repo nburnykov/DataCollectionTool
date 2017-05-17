@@ -1,0 +1,4 @@
+- ID: vShowVersion
+  CLI: "show version; show system-information"
+- ID: vShowCiscoSwitch
+  CLI: "show switch"

@@ -8,6 +8,7 @@ class DeviceConnection:
         self.connectiontype = ctype.lower()
         self.__commandtimeout__ = commandtimeout
         self.__connectionerror__ = False
+        self.__connectionlog__ = []
 
         if self.connectiontype == 'ssh':
 
@@ -26,20 +27,23 @@ class DeviceConnection:
 
         if self.connectiontype == 'telnet':
 
+            # TODO Need to check connection to devices other than Juniper and Cisco, possible remove read_until
+
             self.__tc__ = telnetlib.Telnet(device['ip'])
 
-            self.__tc__.read_until(b"sername:")
+            self.__tc__.read_until(b":")
             self.__tc__.write((device['username'] + '\n').encode('ascii'))
 
-            self.__tc__.read_until(b"assword:")
+            self.__tc__.read_until(b":")
             self.__tc__.write((device['password'] + '\n').encode('ascii'))
 
             time.sleep(self.__commandtimeout__)
             output = str(self.__tc__.read_very_eager(), 'ascii')
 
-            # TODO handle possible connection exceptions, not only Cisco (... error string "error" maybe)
+            #print(output + "[-2]" + output[-2])
+            # TODO handle possible connection exceptions
 
-            if output.lower().find("failed") > -1:
+            if output[-2].find(":") > -1:
                 self.__connectionerror__ = True
                 return
 
@@ -77,17 +81,13 @@ class DeviceConnection:
     def isconnected(self):
         return not self.__connectionerror__
 
-dev = {'ip': '10.171.18.201',
-       'username': 'cisco',
-       'password': 'cisco'}
+hostdata = {'ip': '10.171.254.105',
+            'username': 'ps',
+            'password': 'ps12345'}
 
-dc = DeviceConnection(dev, ctype='Telnet')
-
-out = ''
-out += (dc.runcommand('sh ver'))
-out += (dc.runcommand('sh system-information'))
-
-print(out)
+dc = DeviceConnection(hostdata, ctype='telnet')
+print(dc.runcommand('sh ver'))
+print(dc.isconnected())
 
 
 

@@ -1,37 +1,57 @@
 clMainClass:
 
+  query: vShowVersion
   folder: CLI_Data
-  genericscript: GenericDevice.json
+  genericscript: GenericDevice.yaml
 
   parse:
-  - {expression: cisco, targetClass: clCiscoClass}
-  - {expression: juniper, targetClass: clJuniperClass}
-
-  query: vShowVersion
+  - expression: cisco
+    targetClass: clCiscoClass
+  - expression: junos
+    targetClass: clJuniperClass
 
   clCiscoClass:
 
-    clRouterClass: {folder: router, genericscript: GenericCiscoRouter.json}
-    clSwitchClass: {folder: switch, genericscript: GenericCiscoSwitch.json}
+    query: vShowVersion
     folder: cisco
-    genericscript: GenericCiscoDevice.json
+    genericscript: GenericCiscoDevice.yaml
 
     parse:
-    - {expression: 'C\d{4}.{,2} Software', targetClass: clSwitchClass}
-    - {expression: ' \d{3,4} Software', targetClass: clRouterClass}
+    - expression: 'C\d{4}.{,2} Software'
+      targetClass: clSwitchClass
+    - expression: ' \d{3,4} Software'
+      targetClass: clRouterClass
 
-    query: vShowVersion
+    clRouterClass:
+
+      folder: router
+      genericscript: GenericCiscoRouter.yaml
+
+    clSwitchClass:
+
+      folder: switch
+      genericscript: GenericCiscoSwitch.yaml
 
   clJuniperClass:
 
-    clRouterClass: {folder: router, genericscript: GenericJuniperRouter.json}
-    clSwitchClass: {folder: switch, genericscript: GenericJuniperSwitch.json}
+    query: vShowVersion
     folder: juniper
-    genericscript: GenericJuniperDevice.json
+    genericscript: GenericJuniperDevice.yaml
 
     parse:
-    - {expression: switch, targetClass: clSwitchClass}
-    - {expression: router, targetClass: clRouterClass}
+    - expression: switch
+      targetClass: clSwitchClass
+    - expression: 'Model: mx.*'
+      targetClass: clRouterClass
 
-    query: vShowVersion
+    clRouterClass:
+
+      folder: router
+      genericscript: GenericJuniperRouter.yaml
+
+    clSwitchClass:
+
+      folder: switch
+      genericscript: GenericJuniperSwitch.yaml
+
 

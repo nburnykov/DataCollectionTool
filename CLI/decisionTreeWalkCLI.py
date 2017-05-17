@@ -1,9 +1,10 @@
-import re
 import datetime
-from CLI.portScan import PortScan
+import re
+
 from CLI.deviceConnection import DeviceConnection
+from CLI.portScan import PortScan
+from confproc.queryCLI import QueryCLI
 from confproc.yamlDecoder import yamlload
-from CLI.queryCLI import QueryCLI
 
 
 class DecisionTreeWalkCLI:
@@ -17,6 +18,7 @@ class DecisionTreeWalkCLI:
         self.__connected__ = False
         self.__treeconfigerror__ = False
         self.__targetclasslist__ = []
+        self.__currentclass__ = 'None'
 
         # TODO implement host ping
 
@@ -36,10 +38,6 @@ class DecisionTreeWalkCLI:
         self.__connected__ = True
         self.__decisiontreewalk__('clMainClass', treedict)
 
-    def __processlogadd__(self, msg, cclass=''):
-        self.__processlog__.append((str(datetime.datetime.now().time()), cclass, msg))
-        return
-
     def __decisiontreewalk__(self, currentclass, treedict):
 
         if currentclass not in treedict:
@@ -50,6 +48,7 @@ class DecisionTreeWalkCLI:
         dt = treedict[currentclass]
         self.__pathlist__.append((dt['folder'], dt['genericscript']))
         self.__targetclasslist__.append(currentclass)
+        self.__currentclass__ = currentclass
 
         if 'query' in dt:
 
@@ -72,7 +71,7 @@ class DecisionTreeWalkCLI:
                     output += self.__devconn__.runcommand(s)
 
                 # TODO handle write to file exceptions
-                with open(q+'.txt', 'w') as data_file:
+                with open(q + '.txt', 'w') as data_file:
                     data_file.write(output)
 
                 self.__savedqueryresult__[q] = output
@@ -102,7 +101,7 @@ class DecisionTreeWalkCLI:
                     self.__processlogadd__("      Not found\n")
 
             if len(targetClassList) == 0:
-                self.__processlogadd__("Expressions aren't found, use current folder \"{}\" and script \"{}\""
+                self.__processlogadd__("Expressions aren't found, using current folder \"{}\" and script \"{}\""
                                        .format(dt['folder'], dt['genericscript']))
                 return
 
@@ -110,8 +109,15 @@ class DecisionTreeWalkCLI:
                 self.__decisiontreewalk__(targetClass, dt)
 
         else:
-            self.__processlogadd__("Query section is not presented, use current folder \"{}\" and script \"{}\""
+            self.__processlogadd__("Query section is not presented, stopping recursive search, "
+                                   "using current folder \"{}\" and script \"{}\""
                                    .format(dt['folder'], dt['genericscript']))
+
+    def __processlogadd__(self, msg, cclass=''):
+        if cclass == '':
+            cclass = self.__currentclass__
+        self.__processlog__.append((str(datetime.datetime.now().time()), cclass, msg))
+        return
 
     def getpathlist(self):
         return self.__pathlist__
@@ -134,13 +140,13 @@ class DecisionTreeWalkCLI:
 
 
 hostdata = {'ip': '10.171.18.201',
-            'username': 'cisco',
-            'password': 'cisco'}
+            'username': 'ps',
+            'password': 'ps12345'}
 
 
 td = yamlload("..\\decisionTreeCLI.yaml")
 qd = yamlload("..\\queriesCLI.yaml")
 
 dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
-[print(st3) for st1, st2, st3 in dcw.getlog()]
-print(dcw.getpathlist())
+[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
+print(dcw.gettargetclasslist())
