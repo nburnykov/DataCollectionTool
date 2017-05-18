@@ -19,7 +19,9 @@ clMainClass:
     parse:
     - expression: 'WS-C'
       targetClass: clCatSwitchClass
-    - expression: 'License UDI:'
+    - expression:
+      - 'License UDI:'
+      - '28.. Software'
       targetClass: clRouterClass
 
     clRouterClass:

@@ -25,6 +25,7 @@ class DecisionTreeWalkCLI:
 
         if self.__savedqueryresult__ == {}:     # if not - test mode
 
+            print(self.hostdata)
             ps = PortScan(self.hostdata)
             if ps.issshopen() or ps.istelnetopen():
                 self.__portsopen__ = True
@@ -61,7 +62,7 @@ class DecisionTreeWalkCLI:
 
             if q not in self.__savedqueryresult__:
                 self.__processlogadd__("{} result is not found in cache, performing CLI command:".format(q))
-                self.__processlogadd__("      Host: {}".format(hostdata['ip']))
+                self.__processlogadd__("      Host: {}".format(self.hostdata['ip']))
 
                 qd = QueryCLI(self.querydict)
                 qd.findattributebyname(q)
@@ -93,13 +94,23 @@ class DecisionTreeWalkCLI:
             targetClassList = []
 
             self.__processlogadd__(
-                "Content of the current query {} in cache:\n{}\n".format(q, self.__savedqueryresult__[q]))
+                "Content of the current query {0} in cache:\n===\n{1}\n===\n".format(q, self.__savedqueryresult__[q]))
 
             for pqi in pq:
 
-                regexp = re.compile(pqi['expression'], re.IGNORECASE)
-                self.__processlogadd__("Expression \"" + pqi['expression'] + "\":")
-                if len(regexp.findall(self.__savedqueryresult__[q])) > 0:
+                expr = pqi['expression']
+                if type(expr) is str:
+                    expr = [expr]
+                isexprfound = False
+
+                for e in expr:
+
+                    regexp = re.compile(e, re.IGNORECASE)
+                    self.__processlogadd__("Expression \"" + e + "\":")
+                    if len(regexp.findall(self.__savedqueryresult__[q])) > 0:
+                        isexprfound = True
+
+                if isexprfound:
                     targetClassList.append(pqi['targetClass'])
                     self.__processlogadd__("      Found, proceed to next class: {}\n".format(pqi['targetClass']))
                 else:
@@ -147,14 +158,15 @@ class DecisionTreeWalkCLI:
 
 
 
-# hostdata = {'ip': '10.171.18.201',
-#             'username': 'cisco',
-#             'password': 'cisco'}
-#
-#
-# td = yamlload("..\\decisionTreeCLI.yaml")
-# qd = yamlload("..\\queriesCLI.yaml")
-#
-# dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
-# #[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
-# print(dcw.getteststring())
+hostdata = {'ip': '10.171.18.201',
+            'username': 'cisco',
+            'password': 'cisco'}
+
+
+td = yamlload("..\\decisionTreeCLI.yaml")
+qd = yamlload("..\\queriesCLI.yaml")
+
+dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
+#[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
+print(dcw.getteststring())
+[print(row3) for row1, row2, row3 in dcw.getlog()]
