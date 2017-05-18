@@ -19,5 +19,9 @@ class QueryCLI:
         return
 
     def getattribute(self):
-        return self.attribute
+
+        if type(self.attribute) is str:
+            return [self.attribute]
+        else:
+            return self.attribute
 

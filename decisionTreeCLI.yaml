@@ -12,14 +12,14 @@ clMainClass:
 
   clCiscoClass:
 
-    query: vShowVersion
+    query: vCiscoShowVersionExt
     folder: cisco
     genericscript: GenericCiscoDevice.yaml
 
     parse:
-    - expression: 'C\d{4}.{,2} Software'
-      targetClass: clSwitchClass
-    - expression: ' \d{3,4} Software'
+    - expression: 'WS-C'
+      targetClass: clCatSwitchClass
+    - expression: 'License UDI:'
       targetClass: clRouterClass
 
     clRouterClass:
@@ -27,9 +27,9 @@ clMainClass:
       folder: router
       genericscript: GenericCiscoRouter.yaml
 
-    clSwitchClass:
+    clCatSwitchClass:
 
-      folder: switch
+      folder: catswitch
       genericscript: GenericCiscoSwitch.yaml
 
   clJuniperClass:

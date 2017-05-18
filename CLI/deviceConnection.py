@@ -2,6 +2,7 @@ import paramiko
 import telnetlib
 import time
 
+
 class DeviceConnection:
     def __init__(self, device, ctype='SSH', commandtimeout=2):
         self.device = device
@@ -40,14 +41,11 @@ class DeviceConnection:
             time.sleep(self.__commandtimeout__)
             output = str(self.__tc__.read_very_eager(), 'ascii')
 
-            #print(output + "[-2]" + output[-2])
             # TODO handle possible connection exceptions
 
             if output[-2].find(":") > -1:
                 self.__connectionerror__ = True
                 return
-
-            #self.__tc__.write(b"terminal length 0\n")
 
     def runcommand(self, command):
         if self.__connectionerror__:
@@ -85,9 +83,7 @@ hostdata = {'ip': '10.171.254.105',
             'username': 'ps',
             'password': 'ps12345'}
 
-dc = DeviceConnection(hostdata, ctype='telnet')
-print(dc.runcommand('sh ver'))
-print(dc.isconnected())
+
 
 
 

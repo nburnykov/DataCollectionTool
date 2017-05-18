@@ -8,34 +8,38 @@ from confproc.yamlDecoder import yamlload
 
 
 class DecisionTreeWalkCLI:
-    def __init__(self, hostdata, treedict, querydict):
+    def __init__(self, hostdata, treedict, querydict, savedqueryresult={}):
         self.hostdata = hostdata
         self.querydict = querydict
         self.__processlog__ = []
-        self.__savedqueryresult__ = {}
+        self.__savedqueryresult__ = savedqueryresult
         self.__pathlist__ = []
         self.__portsopen__ = False
         self.__connected__ = False
         self.__treeconfigerror__ = False
         self.__targetclasslist__ = []
         self.__currentclass__ = 'None'
+        self.__test_string__ = ''
 
         # TODO implement host ping
 
-        ps = PortScan(self.hostdata)
-        if ps.issshopen() or ps.istelnetopen():
-            self.__portsopen__ = True
-            self.__devconn__ = DeviceConnection(self.hostdata, ps.connectiontype)
+        if self.__savedqueryresult__ == {}:     # if not - test mode
 
-            if not self.__devconn__.isconnected():
-                self.__processlogadd__("Cannot connect to host: {}".format(hostdata['ip']))
+            ps = PortScan(self.hostdata)
+            if ps.issshopen() or ps.istelnetopen():
+                self.__portsopen__ = True
+                self.__devconn__ = DeviceConnection(self.hostdata, ps.connectiontype)
+
+                if not self.__devconn__.isconnected():
+                    self.__processlogadd__("Cannot connect to host: {}".format(hostdata['ip']))
+                    return
+
+            if not hasattr(self, '__devconn__'):
+                self.__processlogadd__("Telnet and SSH ports are closed. Exit")
                 return
 
-        if not hasattr(self, '__devconn__'):
-            self.__processlogadd__("Telnet and SSH ports are closed. Exit")
-            return
+            self.__connected__ = True
 
-        self.__connected__ = True
         self.__decisiontreewalk__('clMainClass', treedict)
 
     def __decisiontreewalk__(self, currentclass, treedict):
@@ -47,6 +51,7 @@ class DecisionTreeWalkCLI:
 
         dt = treedict[currentclass]
         self.__pathlist__.append((dt['folder'], dt['genericscript']))
+        self.__test_string__ += dt['folder'] + " "
         self.__targetclasslist__.append(currentclass)
         self.__currentclass__ = currentclass
 
@@ -65,7 +70,7 @@ class DecisionTreeWalkCLI:
                     self.__treeconfigerror__ = True
                     return
 
-                qlist = str(qd.getattribute()).split(';')
+                qlist = qd.getattribute()
                 output = ''
                 for s in qlist:
                     output += self.__devconn__.runcommand(s)
@@ -137,16 +142,19 @@ class DecisionTreeWalkCLI:
     def gettargetclasslist(self):
         return self.__targetclasslist__
 
+    def getteststring(self):
+        return str(self.__test_string__).strip(' ')
 
 
-hostdata = {'ip': '10.171.18.201',
-            'username': 'ps',
-            'password': 'ps12345'}
 
-
-td = yamlload("..\\decisionTreeCLI.yaml")
-qd = yamlload("..\\queriesCLI.yaml")
-
-dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
-[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
-print(dcw.gettargetclasslist())
+# hostdata = {'ip': '10.171.18.201',
+#             'username': 'cisco',
+#             'password': 'cisco'}
+#
+#
+# td = yamlload("..\\decisionTreeCLI.yaml")
+# qd = yamlload("..\\queriesCLI.yaml")
+#
+# dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
+# #[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
+# print(dcw.getteststring())
