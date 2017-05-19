@@ -8,11 +8,11 @@ from confproc.yamlDecoder import yamlload
 
 
 class DecisionTreeWalkCLI:
-    def __init__(self, hostdata, treedict, querydict, savedqueryresult={}):
+    def __init__(self, hostdata, treedict, querydict, testdict=None):
         self.hostdata = hostdata
         self.querydict = querydict
         self.__processlog__ = []
-        self.__savedqueryresult__ = savedqueryresult
+        self.__savedqueryresult__ = {} if testdict is None else testdict
         self.__pathlist__ = []
         self.__portsopen__ = False
         self.__connected__ = False
@@ -25,28 +25,27 @@ class DecisionTreeWalkCLI:
 
         if self.__savedqueryresult__ == {}:     # if not - test mode
 
-            print(self.hostdata)
             ps = PortScan(self.hostdata)
             if ps.issshopen() or ps.istelnetopen():
                 self.__portsopen__ = True
                 self.__devconn__ = DeviceConnection(self.hostdata, ps.connectiontype)
 
                 if not self.__devconn__.isconnected():
-                    self.__processlogadd__("Cannot connect to host: {}".format(hostdata['ip']))
+                    self._processlogadd("Cannot connect to host: {}".format(hostdata['ip']))
                     return
 
             if not hasattr(self, '__devconn__'):
-                self.__processlogadd__("Telnet and SSH ports are closed. Exit")
+                self._processlogadd("Telnet and SSH ports are closed. Exit")
                 return
 
             self.__connected__ = True
 
-        self.__decisiontreewalk__('clMainClass', treedict)
+        self._decisiontreewalk('clMainClass', treedict)
 
-    def __decisiontreewalk__(self, currentclass, treedict):
+    def _decisiontreewalk(self, currentclass, treedict):
 
         if currentclass not in treedict:
-            self.__processlogadd__("Target class {} is not found".format(currentclass))
+            self._processlogadd("Target class {} is not found".format(currentclass))
             self.__treeconfigerror__ = True
             return
 
@@ -61,13 +60,13 @@ class DecisionTreeWalkCLI:
             q = dt['query']
 
             if q not in self.__savedqueryresult__:
-                self.__processlogadd__("{} result is not found in cache, performing CLI command:".format(q))
-                self.__processlogadd__("      Host: {}".format(self.hostdata['ip']))
+                self._processlogadd("{} result is not found in cache, performing CLI command:".format(q))
+                self._processlogadd("      Host: {}".format(self.hostdata['ip']))
 
                 qd = QueryCLI(self.querydict)
                 qd.findattributebyname(q)
                 if not qd.isattributepresented():
-                    self.__processlogadd__("Cannot find \"{}\" in queries list, please check queriesCLI.yaml".format(q))
+                    self._processlogadd("Cannot find \"{}\" in queries list, please check queriesCLI.yaml".format(q))
                     self.__treeconfigerror__ = True
                     return
 
@@ -83,7 +82,7 @@ class DecisionTreeWalkCLI:
                 self.__savedqueryresult__[q] = output
 
             if 'parse' not in dt:
-                self.__processlogadd__("\"query\" section exists but \"parse\" is not presented, "
+                self._processlogadd("\"query\" section exists but \"parse\" is not presented, "
                                        "use current folder \"{}\" and script \"{}\"".format(dt['folder'],
                                                                                             dt['genericscript']))
                 self.__treeconfigerror__ = True
@@ -93,7 +92,7 @@ class DecisionTreeWalkCLI:
 
             targetClassList = []
 
-            self.__processlogadd__(
+            self._processlogadd(
                 "Content of the current query {0} in cache:\n===\n{1}\n===\n".format(q, self.__savedqueryresult__[q]))
 
             for pqi in pq:
@@ -106,30 +105,30 @@ class DecisionTreeWalkCLI:
                 for e in expr:
 
                     regexp = re.compile(e, re.IGNORECASE)
-                    self.__processlogadd__("Expression \"" + e + "\":")
+                    self._processlogadd("Expression \"" + e + "\":")
                     if len(regexp.findall(self.__savedqueryresult__[q])) > 0:
                         isexprfound = True
 
                 if isexprfound:
                     targetClassList.append(pqi['targetClass'])
-                    self.__processlogadd__("      Found, proceed to next class: {}\n".format(pqi['targetClass']))
+                    self._processlogadd("      Found, proceed to next class: {}\n".format(pqi['targetClass']))
                 else:
-                    self.__processlogadd__("      Not found\n")
+                    self._processlogadd("      Not found\n")
 
             if len(targetClassList) == 0:
-                self.__processlogadd__("Expressions aren't found, using current folder \"{}\" and script \"{}\""
-                                       .format(dt['folder'], dt['genericscript']))
+                self._processlogadd("Expressions aren't found, using current folder \"{}\" and script \"{}\""
+                                    .format(dt['folder'], dt['genericscript']))
                 return
 
             for targetClass in targetClassList:
-                self.__decisiontreewalk__(targetClass, dt)
+                self._decisiontreewalk(targetClass, dt)
 
         else:
-            self.__processlogadd__("Query section is not presented, stopping recursive search, "
+            self._processlogadd("Query section is not presented, stopping recursive search, "
                                    "using current folder \"{}\" and script \"{}\""
-                                   .format(dt['folder'], dt['genericscript']))
+                                .format(dt['folder'], dt['genericscript']))
 
-    def __processlogadd__(self, msg, cclass=''):
+    def _processlogadd(self, msg, cclass=''):
         if cclass == '':
             cclass = self.__currentclass__
         self.__processlog__.append((str(datetime.datetime.now().time()), cclass, msg))
@@ -158,15 +157,16 @@ class DecisionTreeWalkCLI:
 
 
 
-hostdata = {'ip': '10.171.18.201',
-            'username': 'cisco',
-            'password': 'cisco'}
-
-
-td = yamlload("..\\decisionTreeCLI.yaml")
-qd = yamlload("..\\queriesCLI.yaml")
-
-dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
-#[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
-print(dcw.getteststring())
-[print(row3) for row1, row2, row3 in dcw.getlog()]
+# hostdata = {'ip': '10.171.18.201',
+#             'username': 'cisco',
+#             'password': 'cisco'}
+#
+#
+# td = yamlload("..\\decisionTreeCLI.yaml")
+# qd = yamlload("..\\queriesCLI.yaml")
+#
+# dcw = DecisionTreeWalkCLI(hostdata, treedict=td, querydict=qd)
+# #[print("[{}] {}".format(st2, st3)) for st1, st2, st3 in dcw.getlog()]
+# print(dcw.getteststring())
+# [print(row3) for row1, row2, row3 in dcw.getlog()]
+# print(dcw.getpathlist())

@@ -38,5 +38,22 @@ class TestDecisionTreeWalkCLI(unittest.TestCase):
                 print("{0:50s} {1:40s}".format(row[2], result))
                 self.assertEqual(result, row[1])
 
+    def test_two(self):
+        dcw2 = DecisionTreeWalkCLI({}, {}, {})
+        print('Two')
+        print(dcw2.getlog())
+        self.assertEqual(dcw2.isportsopen(), False)
 
+    def test_three(self):
+        print('Three')
+        hdata = dict(ip='10.171.2.6', username='cisco', password='cisco')
+        dcw3 = DecisionTreeWalkCLI(hdata, self.td, self.qd)
+        print(dcw3.getlog())
+        self.assertEqual(dcw3.isportsopen(), False)
 
+    def test_four(self):
+        print('Four')
+        hdata = dict(ip='10.171.2.5', username='cisco', password='cisco')
+        dcw4 = DecisionTreeWalkCLI(hdata, self.td, self.qd)
+        print(dcw4.getlog())
+        self.assertEqual(dcw4.isportsopen(), True)
