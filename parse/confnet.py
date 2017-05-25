@@ -11,7 +11,7 @@ def _toint(ip_or_mask: str) -> int:
     spl = ip_or_mask.split('.')
 
     if len(spl) == 1:
-        if int(spl[0]) > 24:
+        if int(spl[0]) > 32:
             raise ValueError
         return int(spl[0])
 
@@ -20,7 +20,7 @@ def _toint(ip_or_mask: str) -> int:
         if int(s) > 255:
             raise ValueError
         result = (result << 8) + int(s)
-    print(bin(result))
+
     return result
 
 
@@ -54,15 +54,21 @@ def parseline(net: str) -> set:
 
         mask = 0xFFFFFFFF << (32 - maskbitcount)
         maxhost = 0xFFFFFFFF >> maskbitcount
-        net |= mask
+        net &= mask
 
         return set(range(net, net + maxhost + 1))
 
     return set()
 
 
-def parselist():
-    pass
+def dectoIP(host: int) -> str:
+    mask = 0xFF
+    result = []
+    for i in range(0, 4):
+        result.append(str(host & mask))
+        host >>= 8
+    result.reverse()
 
+    return '.'.join(result)
 
 
