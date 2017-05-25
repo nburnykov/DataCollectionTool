@@ -19,40 +19,50 @@ def _toint(ip_or_mask: str) -> int:
     for s in spl:
         if int(s) > 255:
             raise ValueError
-        result = result << 8
-        result += int(s)
-
+        result = (result << 8) + int(s)
+    print(bin(result))
     return result
 
 
-def parse(nets: list) -> list:
-
-    result = []
+def parseline(net: str) -> set:
 
     rehost = re.compile(REHOSTTEMPLATE)
     rerange = re.compile(RERANGETEMPLATE)
     renet = re.compile(RENETTEMPLATE)
-    for n in nets:
-        matchhost = rehost.match(n)
-        matchrange = rerange.match(n)
-        matchnet = renet.match(n)
 
-        if matchhost is not None:
-            result.append(_toint(matchhost.group('host')))
+    matchhost = rehost.match(net)
+    matchrange = rerange.match(net)
+    matchnet = renet.match(net)
 
-        # TODO spawn set of IP addresses
-        if matchrange is not None:
+    if matchhost is not None:
 
-            low = _toint(matchrange.group('net1'))
-            high = _toint(matchrange.group('net2'))
-            if low > high:
-                raise ValueError
+        return {_toint(matchhost.group('host'))}
 
-            ipset = set(range(low, high + 1))
+    if matchrange is not None:
 
-        if matchnet is not None:
-            result.append((matchnet.group('net1'), matchnet.group('mask')))
+        low = _toint(matchrange.group('net1'))
+        high = _toint(matchrange.group('net2'))
+        if low > high:
+            raise ValueError
 
-    return result
+        return set(range(low, high + 1))
+
+    if matchnet is not None:
+
+        net = _toint(matchnet.group('net1'))
+        maskbitcount = _toint(matchnet.group('mask'))
+
+        mask = 0xFFFFFFFF << (32 - maskbitcount)
+        maxhost = 0xFFFFFFFF >> maskbitcount
+        net |= mask
+
+        return set(range(net, net + maxhost + 1))
+
+    return set()
+
+
+def parselist():
+    pass
+
 
 
