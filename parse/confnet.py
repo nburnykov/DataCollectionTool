@@ -61,6 +61,11 @@ def parseline(net: str) -> set:
     return set()
 
 
+def parselist(iplist: list) -> set:
+    for s in iplist:
+        yield parseline(s)
+
+
 def dectoIP(host: int) -> str:
     mask = 0xFF
     result = []

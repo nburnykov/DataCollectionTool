@@ -1,11 +1,13 @@
 import logging
 from threading import Thread
 from queue import Queue
+from ..CLI.decisionTreeWalkCLI import DecisionTreeWalkCLI
+from .deviceConnection import DeviceConnection
+from .portScan import PortScan
 
-
-log_level = 'INFO'
-logging.basicConfig(level=getattr(logging, log_level), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# log_level = 'INFO'
+# logging.basicConfig(level=getattr(logging, log_level), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 
 
 class ThreadWorker(Thread):
@@ -20,9 +22,9 @@ class ThreadWorker(Thread):
             # Sample shit-code block for demo start{
             try:
                 result = data + 10
-                logger.info('Successfully got result: {}'.format(result))
+                # logger.info('Successfully got result: {}'.format(result))
             except Exception as err:
-                logger.error('Error: {}'.format(err))
+                # logger.error('Error: {}'.format(err))
                 result = False
             # Sample shit-code block for demo end }
             finally:
@@ -39,7 +41,7 @@ def task_threader(input_arg_list, thread_num=100):
         worker.start()
     pos_num = 0
     for arg in input_arg_list:
-        logger.info('Queueing task {} in thrad_queue'.format(arg))
+        # logger.info('Queueing task {} in thrad_queue'.format(arg))
         thread_queue.put((arg, pos_num))
         pos_num += 1
     thread_queue.join()

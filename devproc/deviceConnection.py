@@ -79,9 +79,7 @@ class DeviceConnection:
     def isconnected(self):
         return not self.__connectionerror__
 
-# hostdata = {'ip': '10.171.254.105',
-#             'username': 'ps',
-#             'password': 'ps12345'}
+
 
 
 
