@@ -1,35 +1,11 @@
 import socket
 
 
-class PortScan:
-    def __init__(self, device, timeout=5):
+def istcpportopen(ip: str, port: int, timeout: int = 5) -> bool:
 
-        self.connectiontype = ''
-        self.__telnetisopen__ = False
-        self.__sshisopen__ = False
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
 
-        self.device = device
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(timeout)
+    result = sock.connect_ex((ip, port))
+    return result == 0
 
-        if 'ip' not in device:
-            return
-
-        result = sock.connect_ex((device['ip'], 23))
-        self.__telnetisopen__ = (result == 0)
-        if self.__telnetisopen__:
-            self.connectiontype = 'telnet'
-
-        result = sock.connect_ex((device['ip'], 22))
-        self.__sshisopen__ = (result == 0)
-        if self.__sshisopen__:
-            self.connectiontype = 'ssh'
-
-
-    def istelnetopen(self):
-
-        return self.__telnetisopen__
-
-    def issshopen(self):
-
-        return self.__sshisopen__

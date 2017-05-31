@@ -9,7 +9,7 @@ class DecisionTreeWalkCLI:
     def __init__(self, hostdata: dict, connection: DeviceConnection, treedict: dict, querydict: dict) -> None:
         self.hostdata = hostdata
         self.querydict = querydict
-        self._processlog = []
+        self.__processlog = []
         self._savedqueryresult = {}
         self._pathlist = []
         self._treeconfigerror = False
@@ -109,14 +109,14 @@ class DecisionTreeWalkCLI:
     def _processlogadd(self, msg, cclass=''):
         if cclass == '':
             cclass = self._currentclass
-        self._processlog.append((str(datetime.datetime.now().time()), cclass, msg))
+        self.__processlog.append((str(datetime.datetime.now().time()), cclass, msg))
         return
 
     def getpathlist(self):
         return self._pathlist
 
     def getlog(self):
-        return self._processlog
+        return self.__processlog
 
     def istreeconfigerror(self):
         return self._treeconfigerror
