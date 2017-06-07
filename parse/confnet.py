@@ -66,6 +66,13 @@ def parselist(iplist: list) -> set:
         yield parseline(s)
 
 
+def composeset(iplist: list) -> set:
+    result = set()
+    for rng in parselist(iplist):
+        result |= rng
+    return result
+
+
 def dectoIP(host: int) -> str:
     mask = 0xFF
     result = []
