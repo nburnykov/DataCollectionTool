@@ -2,7 +2,7 @@ import datetime
 import re
 
 from confproc.queryCLI import QueryCLI
-from devproc.deviceConnection import DeviceConnection
+from mainproc.deviceConnection import DeviceConnection
 
 
 class DecisionTreeWalkCLI:

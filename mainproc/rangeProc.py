@@ -1,15 +1,13 @@
 import pickle
 
-from devproc.portScan import istcpportopen
-from devproc.threader import task_threader
+from mainproc.portScan import istcpportopen
+from mainproc.threader import task_threader
 # from .deviceConnection import DeviceConnection
 from parse import confnet
 
 
 scanlist = ["10.171.18.0/24", "10.171.2.5"]
 notscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
-
-credentials = ["cisco/cisco", "ps/ps1234"]
 
 scanset = confnet.composeset(scanlist)
 notscanset = confnet.composeset(notscanlist)
@@ -43,7 +41,10 @@ for i in range(0, len(portslist), 2):
         connection_args2, connection_result2, connection_thread2 = portslist[i+1]
         host2, port2, timeout2 = connection_args2
 
-        openportslist.append(((host1, port1, connection_result1), (host2, port2, connection_result2)))
+        openportslist.append((host1, port1, connection_result1, port2, connection_result2))
+
+with open('openportslist.pickle', 'wb') as f:
+    pickle.dump(openportslist, f)
 
 [print(ops) for ops in openportslist]
 

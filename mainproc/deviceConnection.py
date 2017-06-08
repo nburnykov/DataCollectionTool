@@ -50,9 +50,11 @@ class DeviceConnection:
             # TODO handle possible connection exceptions
 
             if output[-2].find(":") > -1:
+                self.disconnect()
                 return self._isconnected
 
         self._isconnected = True
+
         return self._isconnected
 
     def runcommand(self, command: str, timeout=0) -> str:
@@ -102,7 +104,7 @@ class DeviceConnection:
                 if self._tc.sock:
                     self._tc.sock.send(telnetlib.IAC + telnetlib.NOP)
                     self._isconnected = True
-            except:
+            except Exception:
                 self._isconnected = False
 
         if self._sshc is not None:

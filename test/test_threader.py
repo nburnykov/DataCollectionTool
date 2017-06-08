@@ -1,5 +1,5 @@
 import unittest
-from devproc.threader import task_threader
+from mainproc.threader import task_threader, ThreadResult
 import time
 
 
