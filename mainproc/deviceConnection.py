@@ -15,7 +15,6 @@ class DeviceConnection:
 
     def connect(self, login: str, password: str) -> bool:
 
-        # TODO implement connection check
         self._isconnected = False
 
         if self.connectiontype == 'ssh':
@@ -34,7 +33,7 @@ class DeviceConnection:
 
         if self.connectiontype == 'telnet':
 
-            # TODO Need to check connection to devices other than Juniper and Cisco, possible remove read_until
+            # TODO Verify possible problems with telnet ad SSH connections like session-limit
 
             self._tc = telnetlib.Telnet(self.ip)
 
