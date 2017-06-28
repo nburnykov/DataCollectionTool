@@ -12,6 +12,7 @@ class DeviceConnection:
         self._connectionlog = []        # TODO implement logger
         self._tc = None
         self._sshc = None
+        self._ssh = None
 
     def connect(self, login: str, password: str) -> bool:
 
@@ -27,8 +28,9 @@ class DeviceConnection:
                                look_for_keys=False, allow_agent=False)
             except paramiko.ssh_exception.NoValidConnectionsError:
                 return self._isconnected
-            self._sshc.shell = client.invoke_shell()
-
+            self._ssh = client
+            self._sshc = self._ssh.invoke_shell()
+            
             # TODO handle possible connection exceptions
 
         if self.connectiontype == 'telnet':
@@ -76,10 +78,10 @@ class DeviceConnection:
 
         if self._sshc is not None:
 
-            self._sshc.shell.send("\n")
-            self._sshc.shell.send(command + "\n")
+            self._sshc.send("\n")
+            self._sshc.send(command + "\n")
             time.sleep(timeout_)
-            output = self._sshc.shell.recv(5000)
+            output = self._sshc.recv(5000)
 
         time.sleep(timeout_)
 
@@ -89,8 +91,8 @@ class DeviceConnection:
 
         if not self._isconnected:
             return
-        if self._sshc is not None:
-            self._sshc.close()
+        if self._ssh is not None:
+            self._ssh.close()
         if self._tc is not None:
             self._tc.close()
 
@@ -106,8 +108,8 @@ class DeviceConnection:
             except Exception:
                 self._isconnected = False
 
-        if self._sshc is not None:
-            self._isconnected = self._sshc.get_transport().is_active()
+        if self._ssh is not None:
+            self._isconnected = self._ssh.get_transport() and self._ssh.get_transport().is_active()
 
         return self._isconnected
 

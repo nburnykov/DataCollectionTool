@@ -4,12 +4,13 @@ import re
 from confproc.queryCLI import QueryCLI
 from mainproc.deviceConnection import DeviceConnection
 
+from typing import Tuple, Optional, Sequence, Callable
+
 
 class DecisionTreeWalkCLI:
-    def __init__(self, hostdata: dict, connection: DeviceConnection, treedict: dict, querydict: dict) -> None:
-        self.hostdata = hostdata
+    def __init__(self, connection: DeviceConnection, treedict: dict, querydict: dict) -> None:
         self.querydict = querydict
-        self.__processlog = []
+        self._processlog = []
         self._savedqueryresult = {}
         self._pathlist = []
         self._treeconfigerror = False
@@ -19,6 +20,7 @@ class DecisionTreeWalkCLI:
         self._devconn = connection
 
         self._decisiontreewalk('clMainClass', treedict)
+        connection.disconnect()
 
     def _decisiontreewalk(self, currentclass, treedict):
 
@@ -39,7 +41,7 @@ class DecisionTreeWalkCLI:
 
             if q not in self._savedqueryresult:
                 self._processlogadd("{} result is not found in cache, performing CLI command:".format(q))
-                self._processlogadd("      Host: {}".format(self.hostdata['ip']))
+                self._processlogadd("      Host: {}".format(self._devconn.ip))
 
                 qd = QueryCLI(self.querydict)
                 qd.findattributebyname(q)
@@ -61,14 +63,14 @@ class DecisionTreeWalkCLI:
 
             if 'parse' not in dt:
                 self._processlogadd("\"query\" section exists but \"parse\" is not presented, "
-                                       "use current folder \"{}\" and script \"{}\"".format(dt['folder'],
-                                                                                            dt['genericscript']))
+                                    "use current folder \"{}\" and script \"{}\"".format(dt['folder'],
+                                                                                         dt['genericscript']))
                 self._treeconfigerror = True
                 return
 
             pq = dt['parse']
 
-            targetClassList = []
+            targetclasslist = []
 
             self._processlogadd(
                 "Content of the current query {0} in cache:\n===\n{1}\n===\n".format(q, self._savedqueryresult[q]))
@@ -88,45 +90,41 @@ class DecisionTreeWalkCLI:
                         isexprfound = True
 
                 if isexprfound:
-                    targetClassList.append(pqi['targetClass'])
+                    targetclasslist.append(pqi['targetClass'])
                     self._processlogadd("      Found, proceed to next class: {}\n".format(pqi['targetClass']))
                 else:
                     self._processlogadd("      Not found\n")
 
-            if len(targetClassList) == 0:
+            if len(targetclasslist) == 0:
                 self._processlogadd("Expressions aren't found, using current folder \"{}\" and script \"{}\""
                                     .format(dt['folder'], dt['genericscript']))
                 return
 
-            for targetClass in targetClassList:
+            for targetClass in targetclasslist:
                 self._decisiontreewalk(targetClass, dt)
 
         else:
             self._processlogadd("Query section is not presented, stopping recursive search, "
-                                   "using current folder \"{}\" and script \"{}\""
+                                "using current folder \"{}\" and script \"{}\""
                                 .format(dt['folder'], dt['genericscript']))
 
     def _processlogadd(self, msg, cclass=''):
         if cclass == '':
             cclass = self._currentclass
-        self.__processlog.append((str(datetime.datetime.now().time()), cclass, msg))
+        self._processlog.append((str(datetime.datetime.now().time()), cclass, msg))
         return
 
-    def getpathlist(self):
+    def getpathlist(self) -> Sequence[Tuple[str, str]]:
         return self._pathlist
 
-    def getlog(self):
-        return self.__processlog
+    def getlog(self) -> Sequence[str]:
+        return self._processlog
 
-    def istreeconfigerror(self):
+    def istreeconfigerror(self) -> bool:
         return self._treeconfigerror
 
-    def gettargetclasslist(self):
+    def gettargetclasslist(self) -> Sequence[str]:
         return self._targetclasslist
 
-    def getteststring(self):
+    def getteststring(self) -> str:
         return str(self._test_string).strip(' ')
-
-
-
-

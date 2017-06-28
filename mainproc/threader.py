@@ -9,18 +9,18 @@ class ThreadResult:
 
     def __init__(self) -> None:
         self.func_result = False
-        self.func_data = None  # type: object
+        self.func_data = None  # type: Optional[Callable]
         self.is_exception_in_thread = False
         self.exception_description = ''
         self.is_stop_queue = False
 
 
 class ThreadWorker(Thread):
-    def __init__(self, thread_queue: Queue(), threadfunc: Callable, result_list: list, lock: Lock) -> None:
+    def __init__(self, thread_queue: Queue(), thread_func: Callable, result_list: list, lock: Lock) -> None:
         Thread.__init__(self)
         self.thread_queue = thread_queue
         self.result_list = result_list
-        self.func = threadfunc
+        self.func = thread_func
         self.lock = lock
 
     def run(self):
@@ -50,7 +50,7 @@ class ThreadWorker(Thread):
                 self.thread_queue.task_done()
 
 
-def task_threader(input_arg_list: list, f, thread_num=100) -> Sequence[Optional[Tuple[Tuple, ThreadResult, str]]]:
+def task_threader(input_arg_list: list, f: Callable, thread_num=100) -> Sequence[Optional[Tuple[Tuple, ThreadResult, str]]]:
     thread_queue = Queue()
     lock = Lock()
     result_list = [None] * len(input_arg_list)

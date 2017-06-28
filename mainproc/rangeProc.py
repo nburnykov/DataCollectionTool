@@ -2,17 +2,18 @@ import pickle
 
 from mainproc.portScan import istcpportopen
 from mainproc.threader import task_threader
-# from .deviceConnection import DeviceConnection
+from mainproc.devProc import ident_device_wrap
 from parse import confnet
+from confproc.yamlDecoder import yamlload
 
 
 scanlist = ["10.171.18.0/24", "10.171.2.5"]
-notscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
+dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
 
 scanset = confnet.composeset(scanlist)
-notscanset = confnet.composeset(notscanlist)
+dontscanset = confnet.composeset(dontscanlist)
 
-scanset ^= notscanset
+scanset ^= dontscanset
 
 scanlist = []
 
@@ -46,12 +47,21 @@ for i in range(0, len(portslist), 2):
 with open('openportslist.pickle', 'wb') as f:
     pickle.dump(openportslist, f)
 
-[print(ops) for ops in openportslist]
+credentials = ["cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
 
+td = yamlload("..\\decisionTreeCLI.yaml")
+qd = yamlload("..\\queriesCLI.yaml")
 
-# TODO - connect to devices with opened ports and check credential list
+devargs = []
+for ops in openportslist:
+    devargs.append((ops, credentials, td, qd))
 
+dcwlist = task_threader(devargs, ident_device_wrap, 5)
 
+for dcw in dcwlist:
+    dev, tr, thread = dcw
+    if tr.func_data is not None:
+        tr.func_data = tr.func_data.getpathlist()
+    print(tr.func_data, thread)
 
-# TODO - connect to device console and run decision tree
 

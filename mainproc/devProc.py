@@ -1,13 +1,12 @@
-import pickle
 from mainproc.threader import task_threader, ThreadResult
 from mainproc.deviceConnection import DeviceConnection
-from datetime import datetime
+from CLI.decisionTreeWalkCLI import DecisionTreeWalkCLI
 from typing import Tuple, Sequence, Optional
 
 
 def _devconnection_wrapper(ip: str, port: int, creds: str, result: ThreadResult()) -> None:
 
-    if port==22:
+    if port == 22:
         ctype = 'SSH'
     else:
         ctype = 'telnet'
@@ -58,15 +57,31 @@ def check_credentials(dev: Tuple[str, int, bool, int, bool], creds: Sequence[str
     return valid_connection
 
 
-credentials = ["1/1", "2/2", "cisco/cisco", "ps/ps1234", "4/4", "5/5", "6/6", "7/7"]
-#credentials = ["1/1", "2/2", "cisco/cisco", "ps/ps1234"]
+def ident_device(ccresult: Optional[Tuple[Tuple, ThreadResult]], treedict: dict, querydict: dict) \
+        -> Optional[Sequence[Tuple[str, str]]]:
 
-with open('openportslist.pickle', 'rb') as f:
-    portslist = pickle.load(f)
+    if ccresult is None:
+        return None
 
-print(portslist)
-device = portslist[0]
+    devdata, tr = ccresult
+    dcw = DecisionTreeWalkCLI(tr.func_data, treedict, querydict)
 
-print(check_credentials(device, credentials))
+    return dcw.getpathlist()
 
-# TODO run decision tree
+
+def ident_device_wrap(dev: Tuple[str, int, bool, int, bool], creds: Sequence[str], treedict: dict, querydict: dict,
+                      result: ThreadResult()) -> None:
+
+    ccresult = check_credentials(dev, creds)
+    print(dev, ccresult)
+    if ccresult is None:
+        result.func_result = False
+        return
+
+    devdata, tr = ccresult
+    dcw = DecisionTreeWalkCLI(tr.func_data, treedict, querydict)
+
+    result.func_result = True
+    result.func_data = dcw
+
+
