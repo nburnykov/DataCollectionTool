@@ -18,5 +18,5 @@ class TestDeviceConnection(unittest.TestCase):
     def test_SSH_send_command(self):
         connection = DeviceConnection('10.171.18.7')
         connection.connect('nburnykov', '!QAZ2wsx')
-        self.assertEqual(connection.runcommand('uname -a')[:10], b'Welcome to')
+        self.assertEqual(connection.runcommand('uname -a')[:10], 'Linux ubun')
         connection.disconnect()

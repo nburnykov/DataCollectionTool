@@ -9,6 +9,8 @@ clMainClass:
     targetClass: clCiscoClass
   - expression: junos
     targetClass: clJuniperClass
+  - expression: "GNU/Linux"
+    targetClass: clLinuxClass
 
   clCiscoClass:
 
@@ -32,7 +34,7 @@ clMainClass:
     clCatSwitchClass:
 
       folder: catswitch
-      genericscript: GenericCiscoSwitch.yaml
+      genericscript: CiscoCatSwitch.yaml
 
   clJuniperClass:
 
@@ -56,4 +58,7 @@ clMainClass:
       folder: switch
       genericscript: GenericJuniperSwitch.yaml
 
+  clLinuxClass:
 
+    folder: linux-host
+    genericscript: GenericLinuxHost.yaml

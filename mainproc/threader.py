@@ -5,8 +5,6 @@ from typing import Tuple, Optional, Sequence, Callable
 
 class ThreadResult:
 
-    is_stop_queue = False
-
     def __init__(self) -> None:
         self.func_result = False
         self.func_data = None  # type: Optional[Callable]
@@ -27,20 +25,9 @@ class ThreadWorker(Thread):
         while True:
             data, pos_num, resultobj = self.thread_queue.get()
 
-            self.lock.acquire()
-            qstop = ThreadResult.is_stop_queue
-            self.lock.release()
-
             try:
-                if not qstop:
-                    self.func(*data, resultobj)
-                    if resultobj.is_stop_queue:
 
-                        self.lock.acquire()
-                        ThreadResult.is_stop_queue = True
-                        self.lock.release()
-                else:
-                    resultobj.is_stop_queue = True
+                self.func(*data, resultobj)
 
             except Exception as err:
                 resultobj.is_exception_in_thread = True
@@ -50,7 +37,8 @@ class ThreadWorker(Thread):
                 self.thread_queue.task_done()
 
 
-def task_threader(input_arg_list: list, f: Callable, thread_num=100) -> Sequence[Optional[Tuple[Tuple, ThreadResult, str]]]:
+def task_threader(input_arg_list: list, f: Callable, thread_num=100) \
+        -> Sequence[Optional[Tuple[Tuple, ThreadResult, str]]]:
     thread_queue = Queue()
     lock = Lock()
     result_list = [None] * len(input_arg_list)

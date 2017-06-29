@@ -40,7 +40,7 @@ class DecisionTreeWalkCLI:
             q = dt['query']
 
             if q not in self._savedqueryresult:
-                self._processlogadd("{} result is not found in cache, performing CLI command:".format(q))
+                self._processlogadd("{} result is not found in cache, performing cli command:".format(q))
                 self._processlogadd("      Host: {}".format(self._devconn.ip))
 
                 qd = QueryCLI(self.querydict)

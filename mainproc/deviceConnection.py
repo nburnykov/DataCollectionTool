@@ -11,7 +11,6 @@ class DeviceConnection:
         self._isconnected = False
         self._connectionlog = []        # TODO implement logger
         self._tc = None
-        self._sshc = None
         self._ssh = None
 
     def connect(self, login: str, password: str) -> bool:
@@ -29,8 +28,7 @@ class DeviceConnection:
             except paramiko.ssh_exception.NoValidConnectionsError:
                 return self._isconnected
             self._ssh = client
-            self._sshc = self._ssh.invoke_shell()
-            
+
             # TODO handle possible connection exceptions
 
         if self.connectiontype == 'telnet':
@@ -75,15 +73,11 @@ class DeviceConnection:
             self._tc.write((command + "\n").encode('ascii'))
             time.sleep(timeout_)
             output = str(self._tc.read_very_eager(), 'ascii')
-
-        if self._sshc is not None:
-
-            self._sshc.send("\n")
-            self._sshc.send(command + "\n")
             time.sleep(timeout_)
-            output = self._sshc.recv(5000)
 
-        time.sleep(timeout_)
+        if self._ssh is not None:
+            stdin, stdout, stderr = self._ssh.exec_command(command)
+            output = str(stdout.read() + stderr.read(), 'utf-8')
 
         return output
 

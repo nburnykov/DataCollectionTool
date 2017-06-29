@@ -1,5 +1,5 @@
 import unittest
-from CLI.decisionTreeWalkCLI import DecisionTreeWalkCLI
+from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
 from confproc.yamlDecoder import yamlload
 import csv
 

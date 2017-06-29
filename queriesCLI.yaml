@@ -1,7 +1,8 @@
 - ID: vShowVersion
   CLI:
   - "show version"              # Cisco - Juniper
-  - "show system-information"   # HP - Huawei
+  - "display system-information"   # HP - Huawei
+  - "uname -a"
 
 - ID: vCiscoShowVersionExt
   CLI:

@@ -2,7 +2,7 @@ import pickle
 
 from mainproc.portScan import istcpportopen
 from mainproc.threader import task_threader
-from mainproc.devProc import ident_device_wrap
+from mainproc.devProc import process_device_wrap
 from parse import confnet
 from confproc.yamlDecoder import yamlload
 
@@ -47,7 +47,8 @@ for i in range(0, len(portslist), 2):
 with open('openportslist.pickle', 'wb') as f:
     pickle.dump(openportslist, f)
 
-credentials = ["cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
+#credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
+credentials = ["1/1", "cisco/cisco", "ps/ps1234"]
 
 td = yamlload("..\\decisionTreeCLI.yaml")
 qd = yamlload("..\\queriesCLI.yaml")
@@ -56,12 +57,13 @@ devargs = []
 for ops in openportslist:
     devargs.append((ops, credentials, td, qd))
 
-dcwlist = task_threader(devargs, ident_device_wrap, 5)
+dcwlist = task_threader(devargs, process_device_wrap, 50)
 
 for dcw in dcwlist:
     dev, tr, thread = dcw
     if tr.func_data is not None:
         tr.func_data = tr.func_data.getpathlist()
-    print(tr.func_data, thread)
+
+    print(tr.func_data, thread, tr.is_exception_in_thread, tr.exception_description)
 
 

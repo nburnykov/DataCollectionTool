@@ -1,0 +1,20 @@
+- set_terminal:
+  command: "terminal length 0"
+
+- show_interfaces:
+  command: "show interfaces"
+  file: "show_interfaces.txt"
+  parser:
+  table:
+
+- show_version:
+  command: "show version"
+  file: "show_version.txt"
+
+- show_cdp_neighbors_detail:
+  oommand: "show cdp neighbors detail"
+  file: "show_cdp_neighbors_detail.txt"
+
+- show_spanning_tree:
+  command: "show spanning-tree"
+  file: "show_spanning-tree.txt"
