@@ -1,3 +1,5 @@
+import os
+
 from mainproc.deviceConnection import DeviceConnection
 from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
 from threading import Thread, Lock
@@ -147,9 +149,12 @@ def process_device_wrap(dev: Tuple[str, int, bool, int, bool], creds: Sequence[s
     devdata, tr = ccresult
     dcw = DecisionTreeWalkCLI(tr.func_data, treedict, querydict)
 
-    # plist = dcw.getpathlist()
-    # dpath = '/'.join([directory for directory, script in plist])
-    # print(dpath)
+    plist = dcw.getpathlist()
+    dpath = '/'.join([directory for directory, script in plist])
+
+    if not os.path.isdir(dpath):
+        os.makedirs(dpath)
+
 
     result.func_result = True
     result.func_data = dcw
