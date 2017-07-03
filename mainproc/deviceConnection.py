@@ -12,8 +12,13 @@ class DeviceConnection:
         self._connectionlog = []        # TODO implement logger
         self._tc = None
         self._ssh = None
+        self.login = ''
+        self.password = ''
 
     def connect(self, login: str, password: str) -> bool:
+
+        self.login = login
+        self.password = password
 
         self._isconnected = False
 
@@ -33,7 +38,7 @@ class DeviceConnection:
 
         if self.connectiontype == 'telnet':
 
-            # TODO Verify possible problems with telnet ad SSH connections like session-limit
+            # TODO Verify possible problems with telnet and SSH connections like session-limit
 
             self._tc = telnetlib.Telnet(self.ip)
 
@@ -107,7 +112,10 @@ class DeviceConnection:
 
         return self._isconnected
 
+    def reconnect(self):
 
+        if not self.isconnected():
+            self.connect(self.login, self.password)
 
 
 

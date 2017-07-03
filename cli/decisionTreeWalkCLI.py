@@ -8,7 +8,7 @@ from typing import Tuple, Optional, Sequence, Callable
 
 
 class DecisionTreeWalkCLI:
-    def __init__(self, connection: DeviceConnection, treedict: dict, querydict: dict) -> None:
+    def __init__(self, connection: DeviceConnection, treedict: dict, querydict: dict, do_not_disconnect=True) -> None:
         self.querydict = querydict
         self._processlog = []
         self._savedqueryresult = {}
@@ -20,7 +20,8 @@ class DecisionTreeWalkCLI:
         self._devconn = connection
 
         self._decisiontreewalk('clMainClass', treedict)
-        connection.disconnect()
+        if not do_not_disconnect:
+            connection.disconnect()
 
     def _decisiontreewalk(self, currentclass, treedict):
 

@@ -13,3 +13,6 @@
 
 - command: "show spanning-tree"
   file: "show_spanning-tree.txt"
+
+- command: "show ip ospf neighbors detail"
+  file: "show_ip_ospf_neighbors_detail.txt"

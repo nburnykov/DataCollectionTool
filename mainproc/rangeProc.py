@@ -1,69 +1,74 @@
 import pickle
-
+import os
 from mainproc.portScan import istcpportopen
-from mainproc.threader import task_threader
-from mainproc.devProc import process_device_wrap
+from mainproc.devProc import process_device_wrap, dev_task_threader
 from parse import confnet
 from confproc.yamlDecoder import yamlload
 
 
-scanlist = ["10.171.18.0/24", "10.171.2.5"]
-dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
+from threading import Thread, Lock
+from queue import Queue
+from typing import Tuple, Optional, Sequence, Callable
 
-scanset = confnet.composeset(scanlist)
-dontscanset = confnet.composeset(dontscanlist)
 
-scanset ^= dontscanset
+class ThreadResult:
 
-scanlist = []
+    def __init__(self) -> None:
+        self.func_result = False
+        self.func_data = None  # type: Optional[Callable]
+        self.is_exception_in_thread = False
+        self.exception_description = ''
+        self.is_stop_queue = False
 
-timeout = 1
 
-# for ip in scanset:
-#     for port in [22, 23]:
-#         scanlist.append((confnet.dectoIP(ip), port, timeout))
-#
-# portslist = task_threader(scanlist, istcpportopen)
-#
-# with open('portslist.pickle', 'wb') as f:
-#     pickle.dump(portslist, f)
+def rangeproc():
 
-with open('portslist.pickle', 'rb') as f:
-    portslist = pickle.load(f)
+    scanlist = ["10.171.18.0/24", "10.171.2.5"]
+    dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
 
-openportslist = []
+    scanset = confnet.composeset(scanlist)
+    dontscanset = confnet.composeset(dontscanlist)
 
-for i in range(0, len(portslist), 2):
-    if portslist[i][1] or portslist[i+1][1]:
+    scanset ^= dontscanset
 
-        connection_args1, connection_result1, connection_thread1 = portslist[i]
-        host1, port1, timeout1 = connection_args1
+    scanlist = []
 
-        connection_args2, connection_result2, connection_thread2 = portslist[i+1]
-        host2, port2, timeout2 = connection_args2
+    timeout = 1
 
-        openportslist.append((host1, port1, connection_result1, port2, connection_result2))
+    # for ip in scanset:
+    #     for port in [22, 23]:
+    #         scanlist.append((confnet.dectoIP(ip), port, timeout))
+    #
+    # portslist = task_threader(scanlist, istcpportopen)
+    #
+    # with open('portslist.pickle', 'wb') as f:
+    #     pickle.dump(portslist, f)
 
-with open('openportslist.pickle', 'wb') as f:
-    pickle.dump(openportslist, f)
+    print(os.path.dirname(os.path.abspath(__package__)))
+    with open(os.path.dirname(os.path.abspath(__package__))+'\\test\\testing_database\\portslist.pickle', 'rb') as f:
+        portslist = pickle.load(f)
 
-#credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
-credentials = ["1/1", "cisco/cisco", "ps/ps1234"]
+    openportslist = []
 
-td = yamlload("..\\decisionTreeCLI.yaml")
-qd = yamlload("..\\queriesCLI.yaml")
+    for i in range(0, len(portslist), 2):
+        if portslist[i][1] or portslist[i+1][1]:
 
-devargs = []
-for ops in openportslist:
-    devargs.append((ops, credentials, td, qd))
+            connection_args1, connection_result1, connection_thread1 = portslist[i]
+            host1, port1, timeout1 = connection_args1
 
-dcwlist = task_threader(devargs, process_device_wrap, 50)
+            connection_args2, connection_result2, connection_thread2 = portslist[i+1]
+            host2, port2, timeout2 = connection_args2
 
-for dcw in dcwlist:
-    dev, tr, thread = dcw
-    if tr.func_data is not None:
-        tr.func_data = tr.func_data.getpathlist()
+            openportslist.append((host1, port1, connection_result1, port2, connection_result2))
 
-    print(tr.func_data, thread, tr.is_exception_in_thread, tr.exception_description)
+    #credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
+    credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
+
+    td = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\decisionTreeCLI.yaml")
+    qd = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\queriesCLI.yaml")
+
+    dcwlist = dev_task_threader(openportslist, credentials, td, qd, 50)
+
+    print(dcwlist)
 
 
