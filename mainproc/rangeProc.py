@@ -62,7 +62,7 @@ def rangeproc():
             openportslist.append((host1, port1, connection_result1, port2, connection_result2))
 
     #credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
-    credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
+    credentials = [("1", "1"), ("cisco", "cisco"), ("ps", "ps1234"), ("nburnykov", "!QAZ2wsx")]
 
     td = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\decisionTreeCLI.yaml")
     qd = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\queriesCLI.yaml")

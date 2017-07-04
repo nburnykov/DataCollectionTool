@@ -8,8 +8,11 @@
 - command: "show version"
   file: "show_version.txt"
 
-- command: "show cdp neighbors detail"
+- command: "show cdp nei det"
   file: "show_cdp_neighbors_detail.txt"
 
 - command: "show spanning-tree"
   file: "show_spanning-tree.txt"
+
+- command: "show ip ospf nei det"
+  file: "show_ip_ospf_neighbors_detail"
