@@ -1,0 +1,425 @@
+<Row@BoxLayout>:
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    value: ''
+    Label:
+        text: root.value
+
+MainForm: #
+<MainForm>: #
+	orientation: "vertical" #
+	scr_mng: scr_mng
+	BoxLayout:                                      # Logo and title
+	    id: header
+	    height: "50dp"
+	    size_hint_y: None
+	    canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        BoxLayout:
+            width: "150dp"
+            size_hint_x: None
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            Image:
+                id: logo
+                source: 'Images/logo.png'
+                size: self.size
+        AnchorLayout:
+            anchor_x: "center"
+            anchor_y: "center"
+            canvas:
+                Color:
+                    rgba: 0.568, 0.392, 0.804, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            Label:
+                font_size: "20sp"
+                text: "[color=ffffff][b]Data collection tool[/b][/color]"
+                markup: True
+                size: self.size
+                size_hint_x: None
+	BoxLayout:                                  # Create project and saved projects
+        id: scr_mng
+        msm: mainsm
+        height: "350dp"
+	    size_hint_y: None
+        ScreenManager:
+            id: mainsm
+            sc2: scr2
+            Screen:
+                id: scr0
+                name: 'Instructions'
+                RstDocument:
+                    text:
+                        ('.. _top:\n'
+                        '\n'
+                        'Instructions\n'
+                        '==================\n'
+                        '\n'
+                        'The purpose of this program is to collect data from various networking and server '
+                        'equipment via **Telnet** or **SSH** connection.\n'
+                        '\n'
+                        'To start a new scan click **"New scan"** or load saved scan data Привет! -> \n'
+                        )
+            Screen:
+                id: scr1
+                name: 'Config_net'
+
+                BoxLayout:
+                    orientation: "vertical"
+                    BoxLayout:
+                        height: "15dp"
+                        size_hint_y: None
+                    BoxLayout:
+                        height: "30dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "15dp"
+                            size_hint_x: None
+                        AnchorLayout:
+                            width: "180dp"
+                            size_hint_x: None
+                            anchor_x: "left"
+                            anchor_y: "center"
+                            Label:
+                                font_size: "13sp"
+                                text: "Scan name:"
+                                size: self.size
+                                #width: "180dp"
+                                size_hint_x: None
+#                        AnchorLayout:
+#                            width: "270dp"
+#                            size_hint_x: None
+#                            anchor_x: "center"
+#                            anchor_y: "center"
+                        TextInput:
+                            id: scan_name
+                            size_hint_y: None
+                            height: "30dp"
+                            #size_hint_x: 3
+                            #width: "270dp"
+                            focus: True
+                    BoxLayout:
+                        height: "120dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "15dp"
+                            size_hint_x: None
+                        AnchorLayout:
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            width: "180dp"
+                            size_hint_x: None
+                            Label:
+                                font_size: "13sp"
+                                text: "  Scan range:\n  Examples:\n  Net - 192.168.1.0/24  \n  Host - 172.16.15.32\n  Range - \n    10.15.0.0 - 10.15.1.256"
+                                #width: "180dp"
+                                size: self.size
+                                size_hint_x: None
+#                        AnchorLayout:
+#                            anchor_x: "left"
+#                            anchor_y: "center"
+#                            width: "270dp"
+#                            size_hint_x: None
+                        TextInput:
+                            id: scan_range
+                            #width: "270dp"
+                            height: "120dp"
+                            #size_hint_x: 3
+                    BoxLayout:
+                        height: "120dp"
+                        #size_hint_x: 1
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "15dp"
+                            size_hint_x: None
+                        AnchorLayout:
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            width: "180dp"
+                            size_hint_x: None
+                            Label:
+                                font_size: "13sp"
+                                text: "Do not scan range:"
+                                #width: "150dp"
+                                size: self.size
+                                size_hint_x: None
+#                        AnchorLayout:
+#                            anchor_x: "left"
+#                            anchor_y: "center"
+#                            size_hint_x: 2
+                        TextInput:
+                            id: do_not_scan_range
+                            size_hint_x: 3
+                            #width: "270dp"
+                            height: "120dp"
+                            size_hint_y: None
+                    BoxLayout:
+                        AnchorLayout:
+                            #size_hint_x: 100
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            BoxLayout:
+                                width: "100dp"
+                                height: "30dp"
+                                size_hint_y: None
+                                size_hint_x: None
+                                Button:
+                                    text: "< Prev"
+                                    size_hint_x: 1
+                                    on_release:
+                                        scr1.manager.transition.direction = 'right'
+                                        mainsm.current = 'Instructions'
+                                        #scr1.manager.transition.direction = 'left'
+                                Button:
+                                    text: "Next >"
+                                    size_hint_x: 1
+                                    on_release:
+                                        scr1.manager.transition.direction = 'left'
+                                        mainsm.current = 'Config_creds'
+
+
+            Screen:
+                id: scr2
+                scr2bl: scr2bl
+                name: 'Config_creds'
+
+                BoxLayout:
+                    id: scr2bl
+                    brv: brv
+                    orientation: "vertical"
+                    BoxLayout: # blank header
+                        height: "30dp"
+                        size_hint_y: None
+                        AnchorLayout:
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            Label:
+                                font_size: "13sp"
+                                text: "Credentials list"
+                                #width: "150dp"
+                                size: self.size
+                                size_hint_x: None
+                    BoxLayout: # Credential list
+                        id: brv
+                        cred_view: cred_view
+                        height: "150dp"
+                        size_hint_y: None
+                        RecycleView:
+                            id: cred_view
+                            scroll_type: ['bars', 'content']
+                            scroll_wheel_distance: dp(114)
+                            bar_width: dp(10)
+                            viewclass: 'Row'
+                            RecycleBoxLayout:
+                                default_size: None, dp(30)
+                                default_size_hint: 1, None
+                                size_hint_y: None
+                                height: self.minimum_height
+                                orientation: 'vertical'
+                                spacing: dp(2)
+
+                    BoxLayout: # "Add credentials"
+                        height: "30dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "15dp"
+                            size_hint_x: None
+                        Label:
+                            font_size: "13sp"
+                            text: "Add credentials"
+                            size: self.size
+                    BoxLayout: # Login
+                        height: "30dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "180dp"
+                            size_hint_x: None
+                            Label:
+                                font_size: "13sp"
+                                text: "Login"
+                                size: self.size
+                        TextInput:
+                            id: login_input
+                    BoxLayout: # Password
+                        height: "30dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "180dp"
+                            size_hint_x: None
+                            Label:
+                                font_size: "13sp"
+                                text: "Password"
+                                size: self.size
+                        TextInput:
+                            id: passwd_input
+                            password: True
+                    BoxLayout: # AddButton
+                        height: "30dp"
+                        size_hint_y: None
+                        AnchorLayout:
+                            anchor_y: "center"
+                            anchor_x: "right"
+                            Button:
+                                text: "Add to list"
+                                size: self.size
+                                size_hint_x: None
+                                on_release:
+                                    root.addcredentials(login_input.text, passwd_input.text)
+                                    login_input.text = ''
+                                    passwd_input.text = ''
+                    BoxLayout: # Prev and Next buttons
+                        AnchorLayout:
+                            #size_hint_x: 100
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            BoxLayout:
+                                width: "100dp"
+                                height: "30dp"
+                                size_hint_y: None
+                                size_hint_x: None
+                                Button:
+                                    text: "< Prev"
+                                    size_hint_x: 1
+                                    on_release:
+                                        scr2.manager.transition.direction = 'right'
+                                        mainsm.current = 'Config_net'
+                                        #scr2.manager.transition.direction = 'left'
+                                Button:
+                                    text: "Next >"
+                                    size_hint_x: 1
+                                    on_release:
+                                        scr2.manager.transition.direction = 'left'
+                                        mainsm.current = 'Progress'
+
+
+            Screen:
+                id: scr3
+                name: 'Progress'
+                BoxLayout:
+                    id: scr3bl
+                    orientation: "vertical"
+                    BoxLayout: # header black rectangle
+                        height: "15dp"
+                        size_hint_y: None
+                    GridLayout: # Multichice
+                        id: mgrid
+                        cols: 2
+                        spacing: "8dp"
+                        #size_hint: .5, None
+                        height: self.minimum_height
+                        canvas:
+                            Color:
+                                rgba: 0.568, 0.392, 0.804, 1
+                            Rectangle:
+                                size: self.size
+                                pos: self.pos
+                        Label:
+                            font_size: "13sp"
+                            text: "Scan IP range"
+                        CheckBox:
+                            id: cb_scan
+                            height: "30dp"
+                            size_hint_y: None
+                            active: True
+                        Label:
+                            font_size: "13sp"
+                            text: "Parse existing data"
+                        CheckBox:
+                            id: cb_parse
+                            height: "30dp"
+                            size_hint_y: None
+                        # scan IP range
+                        # parse existing data
+#                AnchorLayout: # Start Button
+#                    Button:
+                    BoxLayout: # Progressbar
+
+
+	    BoxLayout:
+	        width: "350dp"
+            size_hint_x: None
+            orientation: "vertical"
+            canvas.before:
+                Color:
+                    rgba: 0.294, 0.706, 0.902, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            AnchorLayout:
+                anchor_x: "center"
+                anchor_y: "center"
+                height: "30dp"
+	            size_hint_y: None
+                Label:
+                    font_size: "15sp"
+                    text: "[color=ffffff]Saved scans[/color]"
+                    markup: True
+                    size: self.size
+                    size_hint_x: None
+            ScrollView:
+                id: pview
+                bar_width: "6dp"
+                BoxLayout:
+                    height: "100dp"
+                    size_hint_y: None
+                    orientation: "vertical"
+                    Button:
+                        background_normal: 'Images/button_bg2.png'
+                        text: "New scan"
+                        height: "50dp"
+                        size_hint_y: None
+                        on_release:
+                            scr1.manager.transition.direction = 'left'
+                            mainsm.current = 'Progress' # TODO change to Config_net
+                    Button:
+                        background_normal: 'Images/button_bg.png'
+                        text: "Test_scan\nTest_folder"
+                        height: "50dp"
+                        size_hint_y: None
+#                    Button:
+#                        text: "New project"
+#                        height: "15dp"
+#                        size_hint_y: None
+    BoxLayout:                                  # Application Log
+        orientation: "vertical"
+	    canvas.before:
+            Color:
+                rgba: 0.651, 0.651, 0.651, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        AnchorLayout:
+            anchor_x: "center"
+            anchor_y: "center"
+            height: "25dp"
+            size_hint_y: None
+            Label:
+                font_size: "15sp"
+                text: "[color=ffffff]Application log[/color]"
+                markup: True
+                size: self.size
+        ScrollView:
+            id: scrlv
+            bar_width: "6dp"
+            TextInput:
+                size_hint: 1, None
+                background_normal: 'Images/border.png'
+                background_active: 'Images/border.png'
+                foreground_color: 1, 1, 1, 1
+                background_color: 0.651, 0.651, 0.651, 9
+                height: max(self.minimum_height, scrlv.height)
+

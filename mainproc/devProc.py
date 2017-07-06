@@ -112,11 +112,9 @@ class DevThreadWorker(Thread):
                                         + qname)
                 self.lock.release()
             except IOError:
-                print('error')
                 self.lock.release()
                 self.result_list[pos_num] = res_dict
                 self.thread_queue.task_done()
-                print('go further')
                 continue
 
             res_dict['is_yaml_scheme_loaded'] = True
