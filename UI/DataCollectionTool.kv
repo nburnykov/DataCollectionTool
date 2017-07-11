@@ -72,18 +72,20 @@ MainForm: #
                         'The purpose of this program is to collect data from various networking and server '
                         'equipment via **Telnet** or **SSH** connection.\n'
                         '\n'
-                        'To start a new scan click **"New scan"** or load saved scan data Привет! -> \n'
+                        'To start a new scan click **"New scan"** or load saved scan data -> \n'
                         )
             Screen:
                 id: scr1
                 name: 'Config_net'
 
                 BoxLayout:
+                    id: scr1blmain
                     orientation: "vertical"
                     BoxLayout:
                         height: "15dp"
                         size_hint_y: None
                     BoxLayout:
+                        id: scr1bl1
                         height: "30dp"
                         size_hint_y: None
                         BoxLayout:
@@ -113,6 +115,7 @@ MainForm: #
                             #width: "270dp"
                             focus: True
                     BoxLayout:
+                        id: scr1bl2
                         height: "120dp"
                         size_hint_y: None
                         BoxLayout:
@@ -136,10 +139,11 @@ MainForm: #
 #                            size_hint_x: None
                         TextInput:
                             id: scan_range
-                            #width: "270dp"
                             height: "120dp"
-                            #size_hint_x: 3
+                            on_text:
+                                root.setscanrange(scan_range.text)
                     BoxLayout:
+                        id: scr1bl3
                         height: "120dp"
                         #size_hint_x: 1
                         size_hint_y: None
@@ -168,28 +172,29 @@ MainForm: #
                             height: "120dp"
                             size_hint_y: None
                     BoxLayout:
-                        AnchorLayout:
-                            #size_hint_x: 100
-                            anchor_x: "center"
-                            anchor_y: "center"
-                            BoxLayout:
-                                width: "100dp"
-                                height: "30dp"
-                                size_hint_y: None
-                                size_hint_x: None
-                                Button:
-                                    text: "< Prev"
-                                    size_hint_x: 1
-                                    on_release:
-                                        scr1.manager.transition.direction = 'right'
-                                        mainsm.current = 'Instructions'
-                                        #scr1.manager.transition.direction = 'left'
-                                Button:
-                                    text: "Next >"
-                                    size_hint_x: 1
-                                    on_release:
-                                        scr1.manager.transition.direction = 'left'
-                                        mainsm.current = 'Config_creds'
+                    AnchorLayout:
+                        size_hint_y: None
+                        anchor_x: "center"
+                        anchor_y: "center"
+                        height: "50dp"
+                        BoxLayout:
+                            width: "100dp"
+                            height: "30dp"
+                            size_hint_y: None
+                            size_hint_x: None
+                            Button:
+                                text: "< Prev"
+                                size_hint_x: 1
+                                on_release:
+                                    scr1.manager.transition.direction = 'right'
+                                    mainsm.current = 'Instructions'
+                                    #scr1.manager.transition.direction = 'left'
+                            Button:
+                                text: "Next >"
+                                size_hint_x: 1
+                                on_release:
+                                    scr1.manager.transition.direction = 'left'
+                                    mainsm.current = 'Config_creds'
 
 
             Screen:
@@ -281,29 +286,31 @@ MainForm: #
                                     root.addcredentials(login_input.text, passwd_input.text)
                                     login_input.text = ''
                                     passwd_input.text = ''
-                    BoxLayout: # Prev and Next buttons
-                        AnchorLayout:
-                            #size_hint_x: 100
-                            anchor_x: "center"
-                            anchor_y: "center"
-                            BoxLayout:
-                                width: "100dp"
-                                height: "30dp"
-                                size_hint_y: None
-                                size_hint_x: None
-                                Button:
-                                    text: "< Prev"
-                                    size_hint_x: 1
-                                    on_release:
-                                        scr2.manager.transition.direction = 'right'
-                                        mainsm.current = 'Config_net'
-                                        #scr2.manager.transition.direction = 'left'
-                                Button:
-                                    text: "Next >"
-                                    size_hint_x: 1
-                                    on_release:
-                                        scr2.manager.transition.direction = 'left'
-                                        mainsm.current = 'Progress'
+                    BoxLayout:
+                    AnchorLayout: # Prev and Next buttons
+                        #size_hint_x: 100
+                        anchor_x: "center"
+                        anchor_y: "center"
+                        height: "50dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "100dp"
+                            height: "30dp"
+                            size_hint_y: None
+                            size_hint_x: None
+                            Button:
+                                text: "< Prev"
+                                size_hint_x: 1
+                                on_release:
+                                    scr2.manager.transition.direction = 'right'
+                                    mainsm.current = 'Config_net'
+                                    #scr2.manager.transition.direction = 'left'
+                            Button:
+                                text: "Next >"
+                                size_hint_x: 1
+                                on_release:
+                                    scr2.manager.transition.direction = 'left'
+                                    mainsm.current = 'Progress'
 
 
             Screen:
@@ -313,20 +320,20 @@ MainForm: #
                     id: scr3bl
                     orientation: "vertical"
                     BoxLayout: # header black rectangle
-                        height: "15dp"
+                        height: "45dp"
                         size_hint_y: None
-                    GridLayout: # Multichice
+                    GridLayout: # Multichoice
                         id: mgrid
                         cols: 2
                         spacing: "8dp"
-                        #size_hint: .5, None
+                        size_hint: 1, None
                         height: self.minimum_height
-                        canvas:
-                            Color:
-                                rgba: 0.568, 0.392, 0.804, 1
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
+#                        canvas:
+#                            Color:
+#                                rgba: 0.568, 0.392, 0.804, 1
+#                            Rectangle:
+#                                size: self.size
+#                                pos: self.pos
                         Label:
                             font_size: "13sp"
                             text: "Scan IP range"
@@ -337,17 +344,37 @@ MainForm: #
                             active: True
                         Label:
                             font_size: "13sp"
-                            text: "Parse existing data"
+                            text: "Parse data"
                         CheckBox:
                             id: cb_parse
                             height: "30dp"
                             size_hint_y: None
-                        # scan IP range
-                        # parse existing data
-#                AnchorLayout: # Start Button
-#                    Button:
-                    BoxLayout: # Progressbar
-
+                    ProgressBar: # Progressbar
+                        id: mainpb
+                        size_hint_y: None
+                        height: "50dp"
+                    BoxLayout:
+                    AnchorLayout: # Start Button
+                        anchor_x: "center"
+                        anchor_y: "center"
+                        height: "50dp"
+                        size_hint_y: None
+                        BoxLayout:
+                            width: "100dp"
+                            height: "30dp"
+                            size_hint_y: None
+                            size_hint_x: None
+                            Button:
+                                text: "< Prev"
+                                size_hint_x: 1
+                                on_release:
+                                    scr3.manager.transition.direction = 'right'
+                                    mainsm.current = 'Config_creds'
+                            Button:
+                                text: "Start"
+                                size_hint_x: 1
+                                on_release:
+                                    root.startscan()
 
 	    BoxLayout:
 	        width: "350dp"
@@ -384,7 +411,7 @@ MainForm: #
                         size_hint_y: None
                         on_release:
                             scr1.manager.transition.direction = 'left'
-                            mainsm.current = 'Progress' # TODO change to Config_net
+                            mainsm.current = 'Config_net'
                     Button:
                         background_normal: 'Images/button_bg.png'
                         text: "Test_scan\nTest_folder"

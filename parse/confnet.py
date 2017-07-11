@@ -84,3 +84,16 @@ def dectoIP(host: int) -> str:
     return '.'.join(result)
 
 
+def checkline(text: str) -> bool:
+
+    rehost = re.compile(REHOSTTEMPLATE)
+    rerange = re.compile(RERANGETEMPLATE)
+    renet = re.compile(RENETTEMPLATE)
+
+    matchhost = rehost.match(text)
+    matchrange = rerange.match(text)
+    matchnet = renet.match(text)
+
+    return (matchhost is not None) or (matchrange is not None) or (matchnet is not None)
+
+
