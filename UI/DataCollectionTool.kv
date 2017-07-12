@@ -53,12 +53,14 @@ MainForm: #
                 size_hint_x: None
 	BoxLayout:                                  # Create project and saved projects
         id: scr_mng
-        msm: mainsm
+        mainsm: mainsm
         height: "350dp"
 	    size_hint_y: None
         ScreenManager:
             id: mainsm
-            sc2: scr2
+            scr1: scr1
+            scr2: scr2
+
             Screen:
                 id: scr0
                 name: 'Instructions'
@@ -76,6 +78,9 @@ MainForm: #
                         )
             Screen:
                 id: scr1
+                scr1bl1: scr1bl1
+                scr1bl2: scr1bl2
+                scr1bl3: scr1bl3
                 name: 'Config_net'
 
                 BoxLayout:
@@ -86,6 +91,7 @@ MainForm: #
                         size_hint_y: None
                     BoxLayout:
                         id: scr1bl1
+                        scan_name: scan_name
                         height: "30dp"
                         size_hint_y: None
                         BoxLayout:
@@ -116,6 +122,7 @@ MainForm: #
                             focus: True
                     BoxLayout:
                         id: scr1bl2
+                        scan_range: scan_range
                         height: "120dp"
                         size_hint_y: None
                         BoxLayout:
@@ -128,7 +135,7 @@ MainForm: #
                             size_hint_x: None
                             Label:
                                 font_size: "13sp"
-                                text: "  Scan range:\n  Examples:\n  Net - 192.168.1.0/24  \n  Host - 172.16.15.32\n  Range - \n    10.15.0.0 - 10.15.1.256"
+                                text: "  Scan range:\n  Examples:\n  Net - 192.168.1.0/24  \n  Host - 172.16.15.32\n  Range - \n    10.15.0.0-10.15.1.256"
                                 #width: "180dp"
                                 size: self.size
                                 size_hint_x: None
@@ -144,6 +151,7 @@ MainForm: #
                                 root.setscanrange(scan_range.text)
                     BoxLayout:
                         id: scr1bl3
+                        do_not_scan_range: do_not_scan_range
                         height: "120dp"
                         #size_hint_x: 1
                         size_hint_y: None
@@ -171,6 +179,8 @@ MainForm: #
                             #width: "270dp"
                             height: "120dp"
                             size_hint_y: None
+                            on_text:
+                                root.setdonotscanrange(do_not_scan_range.text)
                     BoxLayout:
                     AnchorLayout:
                         size_hint_y: None
