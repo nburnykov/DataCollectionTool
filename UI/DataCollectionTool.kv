@@ -34,7 +34,7 @@ MainForm: #
                     pos: self.pos
             Image:
                 id: logo
-                source: 'Images/logo.png'
+                source: 'UI/Images/logo.png'
                 size: self.size
         AnchorLayout:
             anchor_x: "center"
@@ -384,7 +384,7 @@ MainForm: #
                                 text: "Start"
                                 size_hint_x: 1
                                 on_release:
-                                    root.startscan()
+                                    root.startscan(scan_name.text, scan_range.text, do_not_scan_range.text, cb_scan.active, cb_parse.active)
 
 	    BoxLayout:
 	        width: "350dp"
@@ -415,7 +415,7 @@ MainForm: #
                     size_hint_y: None
                     orientation: "vertical"
                     Button:
-                        background_normal: 'Images/button_bg2.png'
+                        background_normal: 'UI/Images/button_bg2.png'
                         text: "New scan"
                         height: "50dp"
                         size_hint_y: None
@@ -423,7 +423,7 @@ MainForm: #
                             scr1.manager.transition.direction = 'left'
                             mainsm.current = 'Config_net'
                     Button:
-                        background_normal: 'Images/button_bg.png'
+                        background_normal: 'UI/Images/button_bg.png'
                         text: "Test_scan\nTest_folder"
                         height: "50dp"
                         size_hint_y: None
