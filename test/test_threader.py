@@ -1,7 +1,8 @@
-import unittest
-from mainproc.threader import task_threader, ThreadResult
-from mainproc.devProc import check_credentials
 import time
+import unittest
+
+from devproc.devProc import check_credentials
+from devproc.threader import task_threader, ThreadResult
 
 
 class TestThreader(unittest.TestCase):

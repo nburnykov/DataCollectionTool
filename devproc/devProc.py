@@ -1,11 +1,12 @@
 import os
-
-from mainproc.deviceConnection import DeviceConnection
-from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
-from threading import Thread, Lock
-from confproc.yamlDecoder import yamlload
 from queue import Queue
+from threading import Thread, Lock
 from typing import Tuple, Sequence, Optional, Callable, List
+
+from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
+from confproc.yamlDecoder import yamlload
+from constants import PROJECTPATH
+from devproc.deviceConnection import DeviceConnection
 
 
 class ThreadResult:
@@ -53,11 +54,12 @@ class CCThreadWorker(Thread):
 
 
 class DevThreadWorker(Thread):
-    def __init__(self, thread_queue: Queue(), creds: List[Tuple[str, str]], treedict: dict, querydict: dict,
+    def __init__(self, thread_queue: Queue(), creds: List[Tuple[str, str]], scanname: str, treedict: dict, querydict: dict,
                  result_list: list, lock: Lock) -> None:
 
         Thread.__init__(self)
         self.creds = creds
+        self.scanname = scanname
         self.treedict = treedict
         self.querydict = querydict
         self.thread_queue = thread_queue
@@ -67,15 +69,19 @@ class DevThreadWorker(Thread):
     def run(self):
         while True:
 
-            res_dict = {'is_login_successful': False,
-                        'is_dt_processed': False,
-                        'is_yaml_scheme_loaded': False
+            res_dict = {'IP': '',
+                        'credentials': [],  # type: List[str]
+                        'is_login_successful': False,
+                        'is_device_recognized': False,
+                        'is_data_collected': False,
+                        'filepath': [],  # type: List[str]
+                        'queryscript': ''
                         }
 
             dev, pos_num, resultobj = self.thread_queue.get()
-            ccresult = check_credentials(dev, self.creds)
 
-            print('new ' + self.name + str(dev))
+            res_dict['IP'] = dev[0]
+            ccresult = check_credentials(dev, self.creds)
 
             if ccresult is None:
                 self.result_list[pos_num] = res_dict
@@ -85,6 +91,8 @@ class DevThreadWorker(Thread):
             res_dict['is_login_successful'] = True
 
             devdata, tr = ccresult
+            res_dict['credentials'] = [tr.func_data.login, tr.func_data.password]
+
             dcw = DecisionTreeWalkCLI(tr.func_data, self.treedict, self.querydict)
 
             if dcw.istreeconfigerror():
@@ -92,13 +100,13 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            res_dict['is_dt_processed'] = True
+            res_dict['is_device_recognized'] = True
 
-            plist = dcw.getpathlist()  # type: list
+            plist = dcw.getpathlist()  # type: List[str]
 
             dpath = '\\'.join([directory for directory, script in plist])
 
-            dp = os.path.dirname(os.path.abspath(__package__)) + '\\' + dpath
+            dp = self.scanname + '\\' + dpath
 
             plist.reverse()
             qname = plist[0][1]
@@ -106,9 +114,9 @@ class DevThreadWorker(Thread):
             try:
 
                 self.lock.acquire()
-                print(os.path.dirname(os.path.abspath(__package__)) + "\\_DeviceQueryScripts\\" + qname)
+                print(PROJECTPATH + "\\_DeviceQueryScripts\\" + qname)
 
-                query_scheme = yamlload(os.path.dirname(os.path.abspath(__package__)) + "\\_DeviceQueryScripts\\"
+                query_scheme = yamlload(PROJECTPATH + "\\_DeviceQueryScripts\\"
                                         + qname)
                 self.lock.release()
             except IOError:
@@ -117,9 +125,10 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            res_dict['is_yaml_scheme_loaded'] = True
+            res_dict['is_data_collected'] = True
 
-            _device_query(tr.func_data, query_scheme, dp, self.lock)
+            res_dict['filepath'] = _device_query(tr.func_data, query_scheme, dp, self.lock)
+            res_dict['queryscript'] = qname
 
             self.result_list[pos_num] = res_dict
             self.thread_queue.task_done()
@@ -146,14 +155,14 @@ def _cc_task_threader(input_arg_list: list, f: Callable, thread_num=100) \
 
 
 def dev_task_threader(input_arg_list: Sequence[Tuple[str, int, bool, int, bool]], creds: List[Tuple[str, str]],
-                      treedict: dict, querydict: dict, thread_num=100) \
+                      scanname: str, treedict: dict, querydict: dict, thread_num=100) \
         -> Sequence[Optional[Tuple[Tuple, ThreadResult, str]]]:
     thread_queue = Queue()
     lock = Lock()
     result_list = [None] * len(input_arg_list)
 
     for num in range(thread_num):
-        worker = DevThreadWorker(thread_queue, creds, treedict, querydict, result_list, lock)
+        worker = DevThreadWorker(thread_queue, creds, scanname, treedict, querydict, result_list, lock)
         worker.daemon = True
         worker.start()
 
@@ -165,8 +174,10 @@ def dev_task_threader(input_arg_list: Sequence[Tuple[str, int, bool, int, bool]]
     return result_list
 
 
-def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str, lock: Lock()) -> None:
+def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str, lock: Lock()) -> List[str]:
     print(query_scheme)
+    flist = []
+    pfolder = PROJECTPATH + '\\_DATA\\'
     for item in query_scheme:
         ffolder = folder + '\\' + connection.ip
         result = ''
@@ -174,15 +185,19 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
             result = connection.runcommand(item['command'])
 
         if 'file' in item:
+            fp = ffolder + '\\' + item['file']
             lock.acquire()
             try:
-                if not os.path.isdir(ffolder):
-                    os.makedirs(ffolder)
-                with open(ffolder + '\\' + item['file'], 'w') as data_file:
+                if not os.path.isdir(pfolder + ffolder):
+                    os.makedirs(pfolder + ffolder)
+                with open(pfolder + fp, 'w') as data_file:
                     data_file.write(result)
             finally:
                 # TODO add error to log
                 lock.release()
+                flist.append(fp)
+    return flist
+
 
 
 def _devconnection_wrapper(ip: str, port: int, creds: Tuple[str, str], result: ThreadResult()) -> None:

@@ -1,36 +1,55 @@
-import pickle
-import os
-from mainproc.portScan import istcpportopen
-from mainproc.devProc import process_device_wrap, dev_task_threader
-from parse import confnet
+from typing import List
+from typing import Tuple
+
+from yaml import dump
+
 from confproc.yamlDecoder import yamlload
-from typing import List, Tuple
+from constants import PROJECTPATH
+from devproc.devProc import dev_task_threader
+from devproc.portScan import istcpportopen
+from devproc.threader import task_threader
+from parse import confnet
 
 
-from threading import Thread, Lock
-from queue import Queue
-from mainproc.threader import task_threader
-from typing import Tuple, Optional, Sequence, Callable
+class ScanData:
+    def __init__(self):
+        self.scan_name = ''
+        self.scan_list = []         # type: List[str]
+        self.do_not_scan_list = []  # type: List[str]
+        self.credential_list = []   # type: List[Tuple[str, str]]
+        self.is_scan = False
+        self.is_parse = False
+
+    def __str__(self):
+        result = "Scan name: {}\n".format(self.scan_name)
+        result += "Scan list: \n"
+
+        for line in self.scan_list:
+            result += "{}\n".format(line)
+
+        result += "Do not scan list:\n"
+
+        for line in self.do_not_scan_list:
+            result += "{}\n".format(line)
+
+        result += "Credentials list:\n"
+
+        for line in self.credential_list:
+            result += "{}\n".format(line)
+
+        result += "Scan: {}\n".format(self.is_scan)
+        result += "Parse: {}\n".format(self.is_parse)
+
+        return result
 
 
-class ThreadResult:
-
-    def __init__(self) -> None:
-        self.func_result = False
-        self.func_data = None  # type: Optional[Callable]
-        self.is_exception_in_thread = False
-        self.exception_description = ''
-        self.is_stop_queue = False
-
-
-def rangeproc(scan_list: List[str], do_not_scan_list: List[str], credentials_list: List[Tuple[str, str]],
-              is_scan: bool, is_parse: bool):
+def rangeproc(scandata: ScanData):
 
     # scanlist = ["10.171.18.0/24", "10.171.2.5"]
     # dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
 
-    scanset = confnet.composeset(scan_list)
-    dontscanset = confnet.composeset(do_not_scan_list)
+    scanset = confnet.composeset(scandata.scan_list)
+    dontscanset = confnet.composeset(scandata.do_not_scan_list)
 
     scanset ^= dontscanset
 
@@ -43,13 +62,7 @@ def rangeproc(scan_list: List[str], do_not_scan_list: List[str], credentials_lis
             scanlist.append((confnet.dectoIP(ip), port, timeout))
 
     portslist = task_threader(scanlist, istcpportopen)
-    #
-    # with open('portslist.pickle', 'wb') as f:
-    #     pickle.dump(portslist, f)
-
-    # print(os.path.dirname(os.path.abspath(__package__)))
-    # with open(os.path.dirname(os.path.abspath(__package__))+'\\test\\testing_database\\portslist.pickle', 'rb') as f:
-    #     portslist = pickle.load(f)
+    print(portslist)
 
     openportslist = []
 
@@ -61,17 +74,39 @@ def rangeproc(scan_list: List[str], do_not_scan_list: List[str], credentials_lis
 
             connection_args2, connection_result2, connection_thread2 = portslist[i+1]
             host2, port2, timeout2 = connection_args2
+            if connection_result1.func_result or connection_result2.func_result:
+                openportslist.append((host1, port1,
+                                      connection_result1.func_result, port2, connection_result2.func_result))
 
-            openportslist.append((host1, port1, connection_result1, port2, connection_result2))
+    print(openportslist)
 
-    # #credentials = ["1/1", "cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
-    # credentials = [("1", "1"), ("cisco", "cisco"), ("ps", "ps1234"), ("nburnykov", "!QAZ2wsx")]
+    td = yamlload(PROJECTPATH+"\\decisionTreeCLI.yaml")
+    qd = yamlload(PROJECTPATH+"\\queriesCLI.yaml")
 
-    td = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\decisionTreeCLI.yaml")
-    qd = yamlload(os.path.dirname(os.path.abspath(__package__))+"\\queriesCLI.yaml")
+    print(td, qd)
 
-    dcwlist = dev_task_threader(openportslist, credentials_list, td, qd, 50)
+    dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, qd, 50)
 
-    print(dcwlist)
+    conffile = {'Scan Name': scandata.scan_name,
+                'Scan List': scandata.scan_list,
+                'Do Not Scan List': scandata.do_not_scan_list,
+                'Credentials List': [list(cred) for cred in scandata.credential_list],
+                'Discovered Data': dcwlist}
+
+    print(dump(conffile))
+
+    # TODO crypt passwords and logins
+
+    with open(PROJECTPATH + '\\_DATA\\' + scandata.scan_name + '\\' + scandata.scan_name + '.yaml', 'w') as data_file:
+        data_file.write(dump(conffile))
 
 
+if __name__ == "__main__":
+    sd = ScanData()
+    sd.scan_name = "Test_scan"
+    sd.scan_list = ['10.171.18.0/24', "10.171.2.5"]
+    sd.do_not_scan_list = ["10.171.18.0", "10.171.18.255"]
+    sd.credential_list = [("1", "1"), ("cisco", "cisco"), ("ps", "ps1234"), ("nburnykov", "!QAZ2wsx")]
+    sd.is_scan = True
+    sd.is_parse = True
+    rangeproc(sd)

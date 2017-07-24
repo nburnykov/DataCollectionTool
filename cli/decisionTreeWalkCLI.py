@@ -1,10 +1,9 @@
 import datetime
 import re
+from typing import Tuple, Sequence
 
 from confproc.queryCLI import QueryCLI
-from mainproc.deviceConnection import DeviceConnection
-
-from typing import Tuple, Optional, Sequence, Callable
+from devproc.deviceConnection import DeviceConnection
 
 
 class DecisionTreeWalkCLI:
@@ -54,6 +53,7 @@ class DecisionTreeWalkCLI:
                 qlist = qd.getattribute()
                 output = ''
                 for s in qlist:
+                    print(s)
                     output += self._devconn.runcommand(s)
 
                 # TODO handle write to file exceptions

@@ -3,39 +3,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from parse.confnet import checkline
 from typing import List, Tuple, Optional
-from mainproc.rangeProc import rangeproc
+from mainproc.rangeProc import rangeproc, ScanData
 
-
-class ScanData:
-    def __init__(self):
-        self.scan_name = ''
-        self.scan_list = []         # type: List[str]
-        self.do_not_scan_list = []  # type: List[str]
-        self.credential_list = []   # type: List[Tuple[str, str]]
-        self.is_scan = False
-        self.is_parse = False
-
-    def __str__(self):
-        result = "Scan name: {}\n".format(self.scan_name)
-        result += "Scan list: \n"
-
-        for line in self.scan_list:
-            result += "{}\n".format(line)
-
-        result += "Do not scan list:\n"
-
-        for line in self.do_not_scan_list:
-            result += "{}\n".format(line)
-
-        result += "Credentials list:\n"
-
-        for line in self.credential_list:
-            result += "{}\n".format(line)
-
-        result += "Scan: {}\n".format(self.is_scan)
-        result += "Parse: {}\n".format(self.is_parse)
-
-        return result
 
 class MainForm(BoxLayout):
 
@@ -53,8 +22,7 @@ class MainForm(BoxLayout):
         sd.is_scan = is_scan
         sd.is_parse = is_parse
 
-        # TODO Start main procedure
-
+        rangeproc(sd)
         # TODO add scan to saved scans and csv
 
         print(sd)
@@ -91,5 +59,4 @@ class DataCollectionToolApp(App):
 
 
 def showmainform():
-    #MainForm.sd = ScanData()
     DataCollectionToolApp().run()

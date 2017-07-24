@@ -1,0 +1,69 @@
+clMainClass:
+
+  query: vShowVersion
+  folder: CLI_Data
+  genericscript: GenericDevice.yaml
+
+  parse:
+  - expression: cisco
+    targetClass: clCiscoClass
+  - expression: junos
+    targetClass: clJuniperClass
+  - expression: "GNU/Linux"
+    targetClass: clLinuxClass
+
+  clCiscoClass:
+
+    query: vCiscoShowVersionExt
+    folder: cisco
+    genericscript: GenericCiscoDevice.yaml
+
+    parse:
+    - expression: 'WS-C'
+      targetClass: clCatSwitchClass
+    - expression:
+      - 'License UDI:'
+      - '28.. Software'
+      targetClass: clRouterClass
+
+    clRouterClass:
+
+      hostparse: '(.*)[>#]'
+      folder: router
+      genericscript: GenericCiscoRouter.yaml
+
+    clCatSwitchClass:
+
+      hostparse: '(.*)[>#]'
+      folder: catswitch
+      genericscript: CiscoCatSwitch.yaml
+
+  clJuniperClass:
+
+    query: vShowVersion
+    folder: juniper
+    genericscript: GenericJuniperDevice.yaml
+
+    parse:
+    - expression: switch
+      targetClass: clSwitchClass
+    - expression: 'Model: mx.*'
+      targetClass: clRouterClass
+
+    clRouterClass:
+
+      hostparse: '(.*)[>#]'
+      folder: router
+      genericscript: GenericJuniperRouter.yaml
+
+    clSwitchClass:
+
+      hostparse: '^(.*)[>#]$'
+      folder: switch
+      genericscript: GenericJuniperSwitch.yaml
+
+  clLinuxClass:
+
+    hostparse: '(.*)[$#]'
+    folder: linux-host
+    genericscript: GenericLinuxHost.yaml

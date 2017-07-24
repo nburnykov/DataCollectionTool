@@ -1,8 +1,8 @@
-import unittest
 import pickle
-from mainproc.devProc import check_credentials, _device_query, dev_task_threader
+import unittest
+
 from confproc.yamlDecoder import yamlload
-from threading import Lock
+from devproc.devProc import dev_task_threader
 
 
 class TestDevProc(unittest.TestCase):
@@ -27,3 +27,6 @@ class TestDevProc(unittest.TestCase):
 
     def test_dev_task_threader(self):
         dev_task_threader(self.portslist[0], self.credentials, self.td, self.qd, 1)
+
+
+    # TODO test single wrong credentials pair

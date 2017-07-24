@@ -27,7 +27,7 @@ class ThreadWorker(Thread):
 
             try:
 
-                self.func(*data, resultobj)
+                resultobj.func_result = self.func(*data)
 
             except Exception as err:
                 resultobj.is_exception_in_thread = True

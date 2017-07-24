@@ -10,9 +10,21 @@
 
 - command: "show cdp nei det"
   file: "show_cdp_neighbors_detail.txt"
+  parsers:
+    - parser: cisco_ios_show_cdp_neighbors_detail.template
+      table: CDP-NEI
+      fields: "LOCAL_HOST, DESTINATION_HOST, MANAGEMENT_IP, PLATFORM, REMOTE_PORT, LOCAL_PORT, SOFTWARE_VERSION"
 
 - command: "show spanning-tree"
   file: "show_spanning-tree.txt"
+  parsers:
+  - parser: cisco_ios_show_spanning-tree.template
+    table: STP-IFACE
+    fields: "VLAN_ID, INTERFACE, ROLE, STATUS, COST, PORT_PRIORITY, PORT_ID, TYPE"
 
 - command: "show ip ospf nei det"
   file: "show_ip_ospf_neighbors_detail"
+  parsers:
+    - parser: cisco_ios_show_ip_ospf_neighbor.template
+      table: OSPF-NEI
+      fields: "NEIGHBOR_ID, PRIORITY, STATE, DEAD_TIME, ADDRESS, INTERFACE"

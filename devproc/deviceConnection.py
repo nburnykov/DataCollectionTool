@@ -1,4 +1,4 @@
-import paramiko
+from netmiko import ConnectHandler
 import telnetlib
 import time
 
@@ -24,13 +24,14 @@ class DeviceConnection:
 
         if self.connectiontype == 'ssh':
 
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            device = {'device_type': 'cisco_ios',
+                      'ip':   self.ip,
+                      'username': login,
+                      'password': password}
 
             try:
-                client.connect(hostname=self.ip, username=login, password=password,
-                               look_for_keys=False, allow_agent=False)
-            except paramiko.ssh_exception.NoValidConnectionsError:
+                client = ConnectHandler(**device)
+            except Exception:
                 return self._isconnected
             self._ssh = client
 
@@ -81,8 +82,8 @@ class DeviceConnection:
             time.sleep(timeout_)
 
         if self._ssh is not None:
-            stdin, stdout, stderr = self._ssh.exec_command(command)
-            output = str(stdout.read() + stderr.read(), 'utf-8')
+            print(command)
+            output = self._ssh.send_command(command)
 
         return output
 
@@ -91,7 +92,7 @@ class DeviceConnection:
         if not self._isconnected:
             return
         if self._ssh is not None:
-            self._ssh.close()
+            self._ssh.disconnect()
         if self._tc is not None:
             self._tc.close()
 
@@ -108,7 +109,7 @@ class DeviceConnection:
                 self._isconnected = False
 
         if self._ssh is not None:
-            self._isconnected = self._ssh.get_transport() and self._ssh.get_transport().is_active()
+            self._isconnected = self._ssh.remote_conn.get_transport().is_alive()
 
         return self._isconnected
 
