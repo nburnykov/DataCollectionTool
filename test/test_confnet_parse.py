@@ -1,5 +1,5 @@
 import unittest
-from parse.confnet import parseline, dectoIP, checkline
+from parse.confnetparse import parseline, dectoIP, checkline
 
 
 class TestConfnetparse(unittest.TestCase):

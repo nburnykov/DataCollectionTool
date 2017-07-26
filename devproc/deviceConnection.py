@@ -82,8 +82,8 @@ class DeviceConnection:
             time.sleep(timeout_)
 
         if self._ssh is not None:
-            print(command)
-            output = self._ssh.send_command(command)
+            output += self._ssh.find_prompt()+'\n'
+            output += self._ssh.send_command(command)
 
         return output
 

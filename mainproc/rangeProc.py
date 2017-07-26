@@ -8,7 +8,7 @@ from constants import PROJECTPATH
 from devproc.devProc import dev_task_threader
 from devproc.portScan import istcpportopen
 from devproc.threader import task_threader
-from parse import confnet
+from parse import confnetparse
 
 
 class ScanData:
@@ -48,8 +48,8 @@ def rangeproc(scandata: ScanData):
     # scanlist = ["10.171.18.0/24", "10.171.2.5"]
     # dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
 
-    scanset = confnet.composeset(scandata.scan_list)
-    dontscanset = confnet.composeset(scandata.do_not_scan_list)
+    scanset = confnetparse.composeset(scandata.scan_list)
+    dontscanset = confnetparse.composeset(scandata.do_not_scan_list)
 
     scanset ^= dontscanset
 
@@ -59,7 +59,7 @@ def rangeproc(scandata: ScanData):
 
     for ip in scanset:
         for port in [22, 23]:
-            scanlist.append((confnet.dectoIP(ip), port, timeout))
+            scanlist.append((confnetparse.dectoIP(ip), port, timeout))
 
     portslist = task_threader(scanlist, istcpportopen)
     print(portslist)

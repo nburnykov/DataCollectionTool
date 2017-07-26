@@ -2,11 +2,13 @@
 
 - command: "show interfaces"
   file: "show_interfaces.txt"
-  #parser:
-  #table:
+  parsers:
+    - parser: cisco_ios_show_interfaces.template
 
 - command: "show version"
   file: "show_version.txt"
+  parsers:
+  - parser: cisco_ios_show_version.template
 
 - command: "show cdp nei det"
   file: "show_cdp_neighbors_detail.txt"
@@ -28,3 +30,8 @@
     - parser: cisco_ios_show_ip_ospf_neighbor.template
       table: OSPF-NEI
       fields: "NEIGHBOR_ID, PRIORITY, STATE, DEAD_TIME, ADDRESS, INTERFACE"
+
+- command: "show ip route"
+  file: "show_ip_route.txt"
+  parsers:
+    - parser: cisco_ios_show_ip_route.template

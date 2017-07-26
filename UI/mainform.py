@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
-from parse.confnet import checkline
+from parse.confnetparse import checkline
 from typing import List, Tuple, Optional
 from mainproc.rangeProc import rangeproc, ScanData
 

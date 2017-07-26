@@ -214,15 +214,17 @@ def _devconnection_wrapper(ip: str, port: int, creds: Tuple[str, str], result: T
     if result.func_result:
         result.func_data = dc
         result.is_stop_queue = True
+    # else:
+    #     dc.disconnect()
 
 
 def _get_valid_connection(rlist: Sequence[Tuple[Tuple, ThreadResult, str]]) \
         -> Optional[Tuple[Tuple, ThreadResult]]:
     for r in rlist:
         args, tr, tname = r
+        print(args, tr.func_result)
         if tr.func_result:
             return args, tr
-
     return
 
 

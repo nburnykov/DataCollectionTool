@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Tuple, Sequence
+from typing import Tuple, Sequence, Dict
 
 from confproc.queryCLI import QueryCLI
 from devproc.deviceConnection import DeviceConnection
@@ -55,10 +55,6 @@ class DecisionTreeWalkCLI:
                 for s in qlist:
                     print(s)
                     output += self._devconn.runcommand(s)
-
-                # TODO handle write to file exceptions
-                with open(q + '.txt', 'w') as data_file:
-                    data_file.write(output)
 
                 self._savedqueryresult[q] = output
 
@@ -129,3 +125,6 @@ class DecisionTreeWalkCLI:
 
     def getteststring(self) -> str:
         return str(self._test_string).strip(' ')
+
+    def getsavedqueryresult(self) -> Dict[str, str]:
+        return self._savedqueryresult
