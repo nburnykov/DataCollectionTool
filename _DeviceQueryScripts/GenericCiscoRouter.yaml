@@ -8,23 +8,30 @@
 - command: "show version"
   file: "show_version.txt"
   parsers:
-  - parser: cisco_ios_show_version.template
+    - parser: cisco_ios_show_version.template
 
 - command: "show cdp neighbors detail"
   file: "show_cdp_neighbors_detail.txt"
   parsers:
     - parser: cisco_ios_show_cdp_neighbors_detail.template
       table: CDP-NEI
-      preprocess:
+      postprocess:
+        - column: REMOTE_PORT
+          processors: cisco_iface_name_shorten, to_lowercase
+        - column: LOCAL_PORT
+          processors: cisco_iface_name_shorten, to_lowercase
 
 - command: "show ip ospf nei detail"
   file: "show_ip_ospf_neighbors_detail.txt"
   parsers:
     - parser: cisco_ios_show_ip_ospf_neighbor.template
       table: OSPF-NEI
-      preprocess:
+      postprocess:
 
 - command: "show ip route"
   file: "show_ip_route.txt"
   parsers:
     - parser: cisco_ios_show_ip_route.template
+
+- command: "show log"
+  file: "show_log.txt"

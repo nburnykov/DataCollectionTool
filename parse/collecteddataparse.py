@@ -1,17 +1,49 @@
 import jtextfsm
 import csv
+import parse.postpocessors
 from constants import PROJECTPATH
 from confproc.yamlDecoder import yamlload
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 
 
-
-def _find_parser(cli_output_file: str, query_dict: Dict) -> Optional[List[str]]:
+def _find_parser(cli_output_file: str, query_dict: Dict) -> List[Dict]:
+    res_list = []
     for line in query_dict:
         if 'file' in line:
             if line['file'] == cli_output_file:
                 if 'parsers' in line:
-                    return [pr['parser'] for pr in line['parsers']]
+                    for pr in line['parsers']:
+                        res_list.append(pr)
+    return res_list
+
+
+def _get_postprocessors(parser_dict: Dict) -> List[Tuple[str, List[str]]]:
+    res_list = []
+    if 'postprocess' in parser_dict:
+        if parser_dict['postprocess'] is not None:
+            for pp in parser_dict['postprocess']:
+                if 'column' and 'processors' in pp:
+                    proc = [str(p).strip() for p in str(pp['processors']).split(',')]
+                    vproc = [p for p in proc if hasattr(parse.postpocessors, p)]
+                    res_list.append((pp['column'], vproc))
+    return res_list
+
+
+def _apply_postprocessors(processor_list: List[Tuple[str, List[str]]], parsed_data: List) -> List:
+    for proc in processor_list:
+        column_name = proc[0]
+        index = 0
+        for i, column in enumerate(parsed_data[0]):
+            if column == column_name:
+                index = i
+                break
+        else:
+            continue
+        processors = proc[1]
+        for parsed_str in parsed_data[1:]:
+            for p in processors:
+                parsed_str[index] = getattr(parse.postpocessors, p)(parsed_str[index])
+    return parsed_data
 
 
 def _parse_cli_output(cli_output_file_fullpath: str, parser_fullpath: str) -> Optional[List]:
@@ -45,17 +77,23 @@ def collected_data_parse(scan_name: str):
                 f = fl.split('\\')[::-1]
                 parser_list = _find_parser(f[0], query_dict)
 
-                if parser_list is not None:
+                if len(parser_list) > 0:
 
                     for i, parser in enumerate(parser_list):
 
-                        parser_fullpath = PROJECTPATH + '\\_ParseTemplates\\' + parser
+                        parser_fullpath = PROJECTPATH + '\\_ParseTemplates\\' + parser['parser']
                         cli_output_file_fullpath = PROJECTPATH + '_DATA\\' + fl
                         #print(dev['IP'])
                         parsed_data = _parse_cli_output(cli_output_file_fullpath, parser_fullpath)
 
                         if parsed_data is not None:
-                            with open(cli_output_file_fullpath + '.parser_{}.csv'.format(str(i+1)), 'w', newline='') as csv_file:
+                            # TODO apply postprocessors
+                            processor_list = _get_postprocessors(parser)
+                            if len(processor_list) > 0:
+                                parsed_data = _apply_postprocessors(processor_list, parsed_data)
+
+                            with open(cli_output_file_fullpath + '.parser_{}.csv'.format(str(i+1)),
+                                      'w', newline='') as csv_file:
                                 writer = csv.writer(csv_file, delimiter=';')
                                 writer.writerows(parsed_data)
 

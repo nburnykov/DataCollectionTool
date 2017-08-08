@@ -4,6 +4,9 @@
   file: "show_interfaces.txt"
   parsers:
     - parser: cisco_ios_show_interfaces.template
+      postprocess:
+        - column: INTERFACE
+          processors: cisco_iface_name_shorten, to_lowercase
 
 - command: "show version"
   file: "show_version.txt"
@@ -14,24 +17,43 @@
   file: "show_cdp_neighbors_detail.txt"
   parsers:
     - parser: cisco_ios_show_cdp_neighbors_detail.template
-      table: CDP-NEI
-      fields: "LOCAL_HOST, DESTINATION_HOST, MANAGEMENT_IP, PLATFORM, REMOTE_PORT, LOCAL_PORT, SOFTWARE_VERSION"
+      table: CISCO_CDP_NEIGHBORS
+      postprocess:
+        - column: REMOTE_PORT
+          processors: cisco_iface_name_shorten, to_lowercase
+        - column: LOCAL_PORT
+          processors: cisco_iface_name_shorten, to_lowercase
 
 - command: "show spanning-tree"
   file: "show_spanning-tree.txt"
   parsers:
-  - parser: cisco_ios_show_spanning-tree.template
-    table: STP-IFACE
-    fields: "VLAN_ID, INTERFACE, ROLE, STATUS, COST, PORT_PRIORITY, PORT_ID, TYPE"
+    # TODO rename templates to pvst
+    - parser: cisco_ios_show_spanning-tree.template
+      table: STP_INTERFACES
+      postprocess:
+        - column: INTERFACE
+          processors: to_lowercase
+    - parser: cisco_ios_show_spanning-tree__common.template
+      table: STP_BRIDGES
+      postprocess:
+        - column: STP_ROOT_PORT
+          processors: cisco_iface_name_shorten, to_lowercase
+    # TODO Create MSTP parser
+    
 
 - command: "show ip ospf nei det"
-  file: "show_ip_ospf_neighbors_detail"
+  file: "show_ip_ospf_neighbors_detail.txt"
   parsers:
     - parser: cisco_ios_show_ip_ospf_neighbor.template
-      table: OSPF-NEI
-      fields: "NEIGHBOR_ID, PRIORITY, STATE, DEAD_TIME, ADDRESS, INTERFACE"
+      table: OSPF_NEIGHBORS
+      
 
 - command: "show ip route"
   file: "show_ip_route.txt"
   parsers:
+    # TODO check parser, LOCAL_HOST is empty
     - parser: cisco_ios_show_ip_route.template
+      table: ROUTES
+    
+- command: "show log"
+  file: "show_log.txt"
