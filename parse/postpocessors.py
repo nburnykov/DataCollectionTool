@@ -41,7 +41,6 @@ def cisco_route_type_expand(short_route_type: str) -> str:
     for rt in route_types:
         if short_route_type.find(rt[0]) > -1:
             result.append(rt[1])
-
     if len(result) > 0:
         return ' '.join(result)
 

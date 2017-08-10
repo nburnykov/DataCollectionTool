@@ -9,6 +9,7 @@
   file: "show_version.txt"
   parsers:
     - parser: cisco_ios_show_version.template
+      table: VERSION
 
 - command: "show cdp neighbors detail"
   file: "show_cdp_neighbors_detail.txt"
@@ -32,6 +33,22 @@
   file: "show_ip_route.txt"
   parsers:
     - parser: cisco_ios_show_ip_route.template
+      postprocess:
+        - column: PROTOCOL
+          processors: cisco_route_type_expand
+        - column: TYPE
+          processors: cisco_route_type_expand
+        - column: NexthopIf
+          processors: cisco_iface_name_shorten, to_lowercase
+
+- command: "show standby"
+  file: "show_standby.txt"
+  parsers:
+    - parser: cisco_ios_show_standby.template
+      table: HSRP
+      postprocess:
+        - column: VLAN_ID
+          processors: cisco_iface_name_shorten, to_lowercase
 
 - command: "show log"
   file: "show_log.txt"
