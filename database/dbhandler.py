@@ -34,8 +34,16 @@ class DataBaseHandler:
 
     def add_data(self, table_name: str, columns: List, data: List):
         self._create_table(table_name)
+        col = self._get_column_list(table_name)
 
+        col_diff = list(set(columns).difference(col))
+        for c in col_diff:
+            self._connection.execute("ALTER TABLE {} ADD COLUMN {} TEXT;".format(table_name, c))
 
+        column_str = ", ".join(columns)
+        for row in data:
+            row_str = ", ".join(row)
+            self._connection.execute("INSERT INTO {} ({}) VALUES ({})".format(table_name, column_str, row_str))
 
     def disconnect(self):
         self._connection.close()
