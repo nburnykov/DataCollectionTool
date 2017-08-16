@@ -4,6 +4,7 @@
   file: "show_interfaces.txt"
   parsers:
     - parser: cisco_ios_show_interfaces.template
+      table: INTERFACES
       postprocess:
         - column: INTERFACE
           processors: cisco_iface_name_shorten, to_lowercase
@@ -18,7 +19,7 @@
   file: "show_cdp_neighbors_detail.txt"
   parsers:
     - parser: cisco_ios_show_cdp_neighbors_detail.template
-      table: CISCO_CDP_NEIGHBORS
+      table: CDP_NEIGHBORS
       postprocess:
         - column: REMOTE_PORT
           processors: cisco_iface_name_shorten, to_lowercase
@@ -71,6 +72,9 @@
       postprocess:
         - column: VLAN_ID
           processors: cisco_iface_name_shorten, to_lowercase
+        - column: REMOTE_PRIORITY
+          processors: digits_only
+
 
 - command: "show log"
   file: "show_log.txt"

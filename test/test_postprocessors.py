@@ -3,9 +3,6 @@ import parse.postpocessors
 
 class TestPostProcessors(unittest.TestCase):
 
-    def test_existed(self):
-        self.assertTrue(hasattr(parse.postpocessors, 'test'))
-
     def test_cisco_iface_name_shorten(self):
         input_list = [('FastEthernet1/0/24', 'Fa1/0/24'),
                       ('TerabitEthernet0/1', 'Te0/1'),
@@ -38,3 +35,13 @@ class TestPostProcessors(unittest.TestCase):
             test, result = line
             with self.subTest(line=test):
                 self.assertEqual(getattr(parse.postpocessors, 'to_lowercase')(test), result)
+
+    def test_digits_only(self):
+        input_list =[("['110', None]", "110"),
+                     ("abcder15fgh3tr6", "15"),
+                     ("[None, '100']", '100'),
+                     ("lksdfgl)", '')]
+        for line in input_list:
+            test, result = line
+            with self.subTest(line=test):
+                self.assertEqual(getattr(parse.postpocessors, 'digits_only')(test), result)

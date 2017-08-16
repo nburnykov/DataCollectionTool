@@ -1,10 +1,6 @@
 import re
 
 
-def test(input: str) -> str:
-    pass
-
-
 def cisco_iface_name_shorten(long_iface_name: str) -> str:
     result = re.search("^(..)[a-zA-Z-]+([/0-9.]*)", long_iface_name)
     if hasattr(result, 'group'):
@@ -57,3 +53,10 @@ def to_uppercase(input: str) -> str:
 
 def strip_whitespaces(input: str) -> str:
     return input.strip()
+
+
+def digits_only(input: str) -> str:
+    result = re.search("[^\d]+(\d+).*", str(input))
+    if hasattr(result, 'group'):
+        return result.group(1)
+    return ''

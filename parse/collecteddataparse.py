@@ -1,9 +1,10 @@
 import jtextfsm
 import csv
 import parse.postpocessors
-from constants import PROJECTPATH
+from constants import PROJECTPATH, DBNAME, DATADIR
 from confproc.yamlDecoder import yamlload
 from typing import Optional, Dict, List, Tuple
+from database.dbhandler import DataBaseHandler
 
 
 def _find_parser(cli_output_file: str, query_dict: Dict) -> List[Dict]:
@@ -63,10 +64,12 @@ def _parse_cli_output(cli_output_file_fullpath: str, parser_fullpath: str) -> Op
 
 def collected_data_parse(scan_name: str):
 
-    scandr = PROJECTPATH + '\\_DATA\\' + scan_name + '\\'
+    scandr = PROJECTPATH + '\\' + DATADIR + '\\' + scan_name + '\\'
 
     # TODO try finally
     maindict = yamlload(scandr + scan_name + ".yaml")
+
+    dbh = DataBaseHandler(scandr + DBNAME)
 
     for dev in maindict['Discovered Data']:
 
@@ -87,15 +90,22 @@ def collected_data_parse(scan_name: str):
                         parsed_data = _parse_cli_output(cli_output_file_fullpath, parser_fullpath)
 
                         if parsed_data is not None:
-                            # TODO apply postprocessors
                             processor_list = _get_postprocessors(parser)
                             if len(processor_list) > 0:
                                 parsed_data = _apply_postprocessors(processor_list, parsed_data)
+
+                            if 'table' in parser:
+                                if parser['table'] is not None:
+                                    print(parsed_data[0], parsed_data[1:])
+                                    dbh.add_data(parser['table'], parsed_data[0], parsed_data[1:])
+
 
                             with open(cli_output_file_fullpath + '.parser_{}.csv'.format(str(i+1)),
                                       'w', newline='') as csv_file:
                                 writer = csv.writer(csv_file, delimiter=';')
                                 writer.writerows(parsed_data)
+
+    dbh.disconnect()
 
 
 

@@ -12,7 +12,16 @@
 MainForm: #
 <MainForm>: #
 	orientation: "vertical" #
+
 	scr_mng: scr_mng
+	project_list: boxlist
+	do_not_scan_list: do_not_scan_range
+	scan_list: scan_range
+	credential_data: cred_view
+    scan_name: scan_name
+    screen1: scr1
+    screen_manager: mainsm
+
 	BoxLayout:                                      # Logo and title
 	    id: header
 	    height: "50dp"
@@ -122,7 +131,7 @@ MainForm: #
                             focus: True
                     BoxLayout:
                         id: scr1bl2
-                        scan_range: scan_range
+
                         height: "120dp"
                         size_hint_y: None
                         BoxLayout:
@@ -151,7 +160,7 @@ MainForm: #
                                 root.setscanrange(scan_range.text)
                     BoxLayout:
                         id: scr1bl3
-                        do_not_scan_range: do_not_scan_range
+
                         height: "120dp"
                         #size_hint_x: 1
                         size_hint_y: None
@@ -384,9 +393,12 @@ MainForm: #
                                 text: "Start"
                                 size_hint_x: 1
                                 on_release:
+                                    root.add_saved_scan_button(scan_name.text)
                                     root.startscan(scan_name.text, scan_range.text, do_not_scan_range.text, cb_scan.active, cb_parse.active)
 
 	    BoxLayout:
+	        id: prj_mng
+	        pview: pview
 	        width: "350dp"
             size_hint_x: None
             orientation: "vertical"
@@ -411,7 +423,8 @@ MainForm: #
                 id: pview
                 bar_width: "6dp"
                 BoxLayout:
-                    height: "100dp"
+                    id: boxlist
+                    height: "50dp"
                     size_hint_y: None
                     orientation: "vertical"
                     Button:
@@ -422,15 +435,9 @@ MainForm: #
                         on_release:
                             scr1.manager.transition.direction = 'left'
                             mainsm.current = 'Config_net'
-                    Button:
-                        background_normal: 'UI/Images/button_bg.png'
-                        text: "Test_scan\nTest_folder"
-                        height: "50dp"
-                        size_hint_y: None
-#                    Button:
-#                        text: "New project"
-#                        height: "15dp"
-#                        size_hint_y: None
+                            root.new_scan()
+
+
     BoxLayout:                                  # Application Log
         orientation: "vertical"
 	    canvas.before:
