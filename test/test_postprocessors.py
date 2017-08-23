@@ -45,3 +45,13 @@ class TestPostProcessors(unittest.TestCase):
             test, result = line
             with self.subTest(line=test):
                 self.assertEqual(getattr(parse.postpocessors, 'digits_only')(test), result)
+
+    def test_strip_domain(self):
+        input_list = [('NB_Lab_L3_1.orange.com', 'NB_Lab_L3_1'),
+                      ('R6-U27-3750G', 'R6-U27-3750G'),
+                      ('local.com', 'local'),
+                      ('hhh.', 'hhh')]
+        for line in input_list:
+            test, result = line
+            with self.subTest(line=test):
+                self.assertEqual(getattr(parse.postpocessors, 'strip_domain_from_hostname')(test), result)

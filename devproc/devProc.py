@@ -70,10 +70,11 @@ class DevThreadWorker(Thread):
         while True:
 
             res_dict = {'IP': '',
+                        'port': '',
                         'credentials': [],  # type: List[str]
-                        'is_login_successful': False,
-                        'is_device_recognized': False,
-                        'is_data_collected': False,
+                        'is login successful': False,
+                        'is device recognized': False,
+                        'is data collected': False,
                         'filepath': [],  # type: List[str]
                         'queryscript': ''
                         }
@@ -92,6 +93,7 @@ class DevThreadWorker(Thread):
 
             devdata, tr = ccresult
             res_dict['credentials'] = [tr.func_data.login, tr.func_data.password]
+            res_dict['port'] = tr.func_data.connectiontype
 
             dcw = DecisionTreeWalkCLI(tr.func_data, self.treedict, self.querydict)
 
@@ -197,7 +199,6 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
                 lock.release()
                 flist.append(fp)
     return flist
-
 
 
 def _devconnection_wrapper(ip: str, port: int, creds: Tuple[str, str], result: ThreadResult()) -> None:

@@ -28,13 +28,11 @@ clMainClass:
 
     clRouterClass:
 
-      hostparse: '(.*)[>#]'
       folder: router
       genericscript: GenericCiscoRouter.yaml
 
     clCatSwitchClass:
 
-      hostparse: '(.*)[>#]'
       folder: catswitch
       genericscript: CiscoCatSwitch.yaml
 
@@ -52,13 +50,11 @@ clMainClass:
 
     clRouterClass:
 
-      hostparse: '(.*)[>#]'
       folder: router
       genericscript: GenericJuniperRouter.yaml
 
     clSwitchClass:
 
-      hostparse: '^(.*)[>#]$'
       folder: switch
       genericscript: GenericJuniperSwitch.yaml
 

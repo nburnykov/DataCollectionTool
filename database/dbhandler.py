@@ -22,7 +22,7 @@ class DataBaseHandler:
         return False
 
     def _create_table(self, table_name: str):
-        self._cursor.execute("CREATE TABLE IF NOT EXISTS {} (ID_ INTEGER PRIMARY KEY AUTOINCREMENT);"
+        self._cursor.execute("CREATE TABLE IF NOT EXISTS {} (__ID INTEGER PRIMARY KEY AUTOINCREMENT, __IP TEXT);"
                              .format(table_name))
         self._connection.commit()
 
@@ -32,9 +32,9 @@ class DataBaseHandler:
 
     def _get_column_list(self, table_name: str) -> List:
         result = self._cursor.execute("SELECT * FROM {};".format(table_name))
-        return [row[0] for row in result.description if row[0] != 'ID_']
+        return [row[0] for row in result.description if row[0] not in ['__ID', '__IP']]
 
-    def add_data(self, table_name: str, columns: List, data: List[List]):
+    def add_data(self, table_name: str, columns: List, data: List[List], ip: str):
         self._create_table(table_name)
         existed_columns = self._get_column_list(table_name)
 
@@ -44,11 +44,11 @@ class DataBaseHandler:
             print(query)
             self._cursor.execute(query)
 
-        column_str = ", ".join(columns)
+        column_str = '__IP, '+", ".join(columns)
         for row in data:
             escaped_row = ["\'" + str(r) + "\'" for r in row]
-            row_str = ", ".join(escaped_row)
-            query = "INSERT INTO {} ({}) VALUES ({});".format(table_name, column_str, row_str)
+            row_str = '\'{}\', '.format(ip) + ", ".join(escaped_row)
+            query = "INSERT INTO {0} ({1}) VALUES ({2});".format(table_name, column_str, row_str)
             print(query)
             self._cursor.execute(query)
 

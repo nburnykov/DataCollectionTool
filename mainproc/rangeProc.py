@@ -93,8 +93,6 @@ def rangeproc(scandata: ScanData):
                 'Credentials List': [list(cred) for cred in scandata.credential_list],
                 'Discovered Data': dcwlist}
 
-    print(dump(conffile))
-
     # TODO crypt passwords and logins
 
     with open(PROJECTPATH + '\\_DATA\\' + scandata.scan_name + '\\' + scandata.scan_name + '.yaml', 'w') as data_file:
@@ -104,7 +102,7 @@ def rangeproc(scandata: ScanData):
 if __name__ == "__main__":
     sd = ScanData()
     sd.scan_name = "Test_scan"
-    sd.scan_list = ['10.171.18.0/24', "10.171.2.5", "10.171.64.133"]
+    sd.scan_list = ['10.171.18.0/24', "10.171.2.5", "10.171.64.133", ]
     sd.do_not_scan_list = ["10.171.18.0", "10.171.18.255"]
     sd.credential_list = [("cisco", "cisco"), ("ps", "ps1234")]
     sd.is_scan = True

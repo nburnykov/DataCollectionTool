@@ -1,12 +1,12 @@
 - ID: vShowVersion
   CLI:
-  - "show version"              # Cisco - Juniper
-  - "display system-information"   # HP - Huawei
+  - "show version"
+  - "display system-information"
   - "uname -a"
 
 - ID: vCiscoShowVersionExt
   CLI:
-  - "terminal length 0"         # disabling page output
+  - "terminal length 0"
   - "sh ver"
 
 - ID: vCiscoShowSwitch

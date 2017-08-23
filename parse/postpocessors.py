@@ -9,6 +9,18 @@ def cisco_iface_name_shorten(long_iface_name: str) -> str:
     return long_iface_name
 
 
+def to_lowercase(input: str) -> str:
+    return input.lower()
+
+
+def to_uppercase(input: str) -> str:
+    return input.upper()
+
+
+def strip_whitespaces(input: str) -> str:
+    return input.strip()
+
+
 def cisco_route_type_expand(short_route_type: str) -> str:
     result = []
     route_types = [('C', 'connected'),
@@ -16,6 +28,7 @@ def cisco_route_type_expand(short_route_type: str) -> str:
                    ('R', 'RIP'),
                    ('M', 'mobile'),
                    ('B', 'BGP'),
+                   ('L', 'local'),
                    ('D', 'EIGRP'),
                    ('EX', 'EIGRP external'),
                    ('O', 'OSPF'),
@@ -43,20 +56,12 @@ def cisco_route_type_expand(short_route_type: str) -> str:
     return short_route_type
 
 
-def to_lowercase(input: str) -> str:
-    return input.lower()
-
-
-def to_uppercase(input: str) -> str:
-    return input.upper()
-
-
-def strip_whitespaces(input: str) -> str:
-    return input.strip()
-
-
 def digits_only(input: str) -> str:
     result = re.search("[^\d]+(\d+).*", str(input))
     if hasattr(result, 'group'):
         return result.group(1)
     return ''
+
+
+def strip_domain_from_hostname(input: str) -> str:
+    return input.split('.')[0]

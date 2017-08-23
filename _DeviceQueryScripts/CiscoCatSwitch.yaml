@@ -25,11 +25,12 @@
           processors: cisco_iface_name_shorten, to_lowercase
         - column: LOCAL_PORT
           processors: cisco_iface_name_shorten, to_lowercase
+        - column: DESTINATION_HOST
+          processors: strip_domain_from_hostname
 
 - command: "show spanning-tree"
   file: "show_spanning-tree.txt"
   parsers:
-    # TODO rename templates to pvst
     - parser: cisco_ios_show_spanning-tree.template
       table: STP_INTERFACES
       postprocess:
@@ -40,20 +41,19 @@
       postprocess:
         - column: STP_ROOT_PORT
           processors: cisco_iface_name_shorten, to_lowercase
-    # TODO Create MSTP parser
-    
 
 - command: "show ip ospf nei det"
   file: "show_ip_ospf_neighbors_detail.txt"
   parsers:
-    - parser: cisco_ios_show_ip_ospf_neighbor.template
+    - parser: cisco_ios_show_ip_ospf_neighbor_detail.template
       table: OSPF_NEIGHBORS
-      
+      postprocess:
+        - column: INTERFACE
+          processors: cisco_iface_name_shorten, to_lowercase
 
 - command: "show ip route"
   file: "show_ip_route.txt"
   parsers:
-    # TODO check parser, LOCAL_HOST is empty
     - parser: cisco_ios_show_ip_route.template
       table: ROUTES
       postprocess:
@@ -75,6 +75,24 @@
         - column: REMOTE_PRIORITY
           processors: digits_only
 
+- command: "sh int trunk"
+  file: "sh_int_trunk.txt"
+  parsers:
+    - parser: cisco_ios_show_trunk_allowed.template
+      table: TRUNK_VLAN_ALLOWED
+      postprocess:
+        - column: INTERFACE
+          processors: to_lowercase
+    - parser: cisco_ios_show_trunk_active.template
+      table: TRUNK_VLAN_ACTIVE
+      postprocess:
+        - column: INTERFACE
+          processors: to_lowercase
+    - parser: cisco_ios_show_trunk_forward.template
+      table: TRUNK_VLAN_STP_FORWARD
+      postprocess:
+        - column: INTERFACE
+          processors: to_lowercase
 
 - command: "show log"
   file: "show_log.txt"

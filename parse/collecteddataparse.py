@@ -1,7 +1,7 @@
 import jtextfsm
 import csv
 import parse.postpocessors
-from constants import PROJECTPATH, DBNAME, DATADIR
+from constants import PROJECTPATH, DATADIR
 from confproc.yamlDecoder import yamlload
 from typing import Optional, Dict, List, Tuple
 from database.dbhandler import DataBaseHandler
@@ -69,7 +69,7 @@ def collected_data_parse(scan_name: str):
     # TODO try finally
     maindict = yamlload(scandr + scan_name + ".yaml")
 
-    dbh = DataBaseHandler(scandr + DBNAME)
+    dbh = DataBaseHandler(scandr + scan_name + ".db")
 
     for dev in maindict['Discovered Data']:
 
@@ -97,7 +97,7 @@ def collected_data_parse(scan_name: str):
                             if 'table' in parser:
                                 if parser['table'] is not None:
                                     print(parsed_data[0], parsed_data[1:])
-                                    dbh.add_data(parser['table'], parsed_data[0], parsed_data[1:])
+                                    dbh.add_data(parser['table'], parsed_data[0], parsed_data[1:], dev['IP'])
 
 
                             with open(cli_output_file_fullpath + '.parser_{}.csv'.format(str(i+1)),
