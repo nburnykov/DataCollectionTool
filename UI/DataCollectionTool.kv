@@ -117,17 +117,10 @@ MainForm: #
                                 size: self.size
                                 #width: "180dp"
                                 size_hint_x: None
-#                        AnchorLayout:
-#                            width: "270dp"
-#                            size_hint_x: None
-#                            anchor_x: "center"
-#                            anchor_y: "center"
                         TextInput:
                             id: scan_name
                             size_hint_y: None
                             height: "30dp"
-                            #size_hint_x: 3
-                            #width: "270dp"
                             focus: True
                     BoxLayout:
                         id: scr1bl2
@@ -148,11 +141,6 @@ MainForm: #
                                 #width: "180dp"
                                 size: self.size
                                 size_hint_x: None
-#                        AnchorLayout:
-#                            anchor_x: "left"
-#                            anchor_y: "center"
-#                            width: "270dp"
-#                            size_hint_x: None
                         TextInput:
                             id: scan_range
                             height: "120dp"
@@ -178,10 +166,6 @@ MainForm: #
                                 #width: "150dp"
                                 size: self.size
                                 size_hint_x: None
-#                        AnchorLayout:
-#                            anchor_x: "left"
-#                            anchor_y: "center"
-#                            size_hint_x: 2
                         TextInput:
                             id: do_not_scan_range
                             size_hint_x: 3
@@ -347,12 +331,6 @@ MainForm: #
                         spacing: "8dp"
                         size_hint: 1, None
                         height: self.minimum_height
-#                        canvas:
-#                            Color:
-#                                rgba: 0.568, 0.392, 0.804, 1
-#                            Rectangle:
-#                                size: self.size
-#                                pos: self.pos
                         Label:
                             font_size: "13sp"
                             text: "Scan IP range"
@@ -393,7 +371,6 @@ MainForm: #
                                 text: "Start"
                                 size_hint_x: 1
                                 on_release:
-                                    root.add_saved_scan_button(scan_name.text)
                                     root.startscan(scan_name.text, scan_range.text, do_not_scan_range.text, cb_scan.active, cb_parse.active)
 
 	    BoxLayout:

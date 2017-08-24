@@ -73,7 +73,7 @@ def collected_data_parse(scan_name: str):
 
     for dev in maindict['Discovered Data']:
 
-        if dev['is_data_collected']:
+        if dev['is data collected']:
             query_dict = yamlload(PROJECTPATH + '_DeviceQueryScripts\\' + dev['queryscript'])
 
             for fl in dev['filepath']:
@@ -86,7 +86,6 @@ def collected_data_parse(scan_name: str):
 
                         parser_fullpath = PROJECTPATH + '\\_ParseTemplates\\' + parser['parser']
                         cli_output_file_fullpath = PROJECTPATH + '_DATA\\' + fl
-                        #print(dev['IP'])
                         parsed_data = _parse_cli_output(cli_output_file_fullpath, parser_fullpath)
 
                         if parsed_data is not None:

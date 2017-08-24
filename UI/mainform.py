@@ -7,13 +7,14 @@ from mainproc.rangeProc import rangeproc, ScanData
 from kivy.uix.button import Button
 from constants import PROJECTPATH
 from functools import partial
-from kivy.properties import ObjectProperty, ListProperty
+from kivy.properties import ObjectProperty, ListProperty, BooleanProperty
 from confproc.yamlDecoder import yamlload, yamldump
 
 
 class MainForm(BoxLayout):
     sd = ScanData()
     slist = ListProperty()
+    is_data_load = BooleanProperty(False)
 
     scan_name = ObjectProperty()
     project_list = ObjectProperty()
@@ -30,6 +31,9 @@ class MainForm(BoxLayout):
         if login != '':
             sd.credential_list.append((login, password))
             self.credential_data.data.insert(0, {'value': login})
+
+    def clearcredentials(self):
+        self.credential_data.data = []
 
     def startscan(self, scan_name: str, scan_range: str, do_not_scan_range: str, is_scan: bool, is_parse: bool,
                   sd=sd):
@@ -49,6 +53,9 @@ class MainForm(BoxLayout):
                            'Folder': '_DATA\\' + sd.scan_name})
         print(self.slist)
         yamldump('scans.yaml', list(self.slist))
+
+        if not self.is_data_load:
+            self.add_saved_scan_button(scan_name)
 
     def setscanrange(self, text: str):
         t = text.split("\n")
@@ -88,6 +95,7 @@ class MainForm(BoxLayout):
 
         collected_config = yamlload("{0}/_DATA/{1}/{1}.yaml".format(PROJECTPATH, scan_name))
         if collected_config.get('Credentials List', None) is not None:
+            self.clearcredentials()
             for cred in collected_config['Credentials List']:
                 self.addcredentials(cred[0], cred[1])
 
@@ -102,12 +110,14 @@ class MainForm(BoxLayout):
 
         self.screen1.manager.transition.direction = 'left'
         self.screen_manager.current = 'Config_net'
+        self.is_data_load = True
 
     def new_scan(self):
         self.scan_name.text = ''
         self.credential_data.data = []
         self.scan_list.text = ''
         self.do_not_scan_list.text = ''
+        self.is_data_load = False
 
 
 class DataCollectionToolApp(App):

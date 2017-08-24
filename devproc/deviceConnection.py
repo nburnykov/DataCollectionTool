@@ -64,6 +64,7 @@ class DeviceConnection:
 
     def runcommand(self, command: str, timeout=0) -> str:
 
+        print(self.ip, command)
         timeout_ = self._commandtimeout
 
         if timeout > 0:

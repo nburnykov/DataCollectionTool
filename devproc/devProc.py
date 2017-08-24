@@ -89,7 +89,7 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            res_dict['is_login_successful'] = True
+            res_dict['is login successful'] = True
 
             devdata, tr = ccresult
             res_dict['credentials'] = [tr.func_data.login, tr.func_data.password]
@@ -102,7 +102,7 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            res_dict['is_device_recognized'] = True
+            res_dict['is device recognized'] = True
 
             plist = dcw.getpathlist()  # type: List[str]
 
@@ -116,7 +116,6 @@ class DevThreadWorker(Thread):
             try:
 
                 self.lock.acquire()
-                print(PROJECTPATH + "\\_DeviceQueryScripts\\" + qname)
 
                 query_scheme = yamlload(PROJECTPATH + "\\_DeviceQueryScripts\\"
                                         + qname)
@@ -127,7 +126,7 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            res_dict['is_data_collected'] = True
+            res_dict['is data collected'] = True
 
             res_dict['filepath'] = _device_query(tr.func_data, query_scheme, dp, self.lock)
             res_dict['queryscript'] = qname
@@ -177,7 +176,7 @@ def dev_task_threader(input_arg_list: Sequence[Tuple[str, int, bool, int, bool]]
 
 
 def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str, lock: Lock()) -> List[str]:
-    print(query_scheme)
+
     flist = []
     pfolder = PROJECTPATH + '\\_DATA\\'
     for item in query_scheme:
@@ -223,7 +222,6 @@ def _get_valid_connection(rlist: Sequence[Tuple[Tuple, ThreadResult, str]]) \
         -> Optional[Tuple[Tuple, ThreadResult]]:
     for r in rlist:
         args, tr, tname = r
-        print(args, tr.func_result)
         if tr.func_result:
             return args, tr
     return
@@ -267,7 +265,7 @@ def process_device_wrap(dev: Tuple[str, int, bool, int, bool], creds: List[Tuple
                         querydict: dict,
                         result: ThreadResult()) -> None:
     ccresult = check_credentials(dev, creds)
-    print(dev, ccresult)
+
     if ccresult is None:
         result.func_result = False
         return
@@ -280,8 +278,6 @@ def process_device_wrap(dev: Tuple[str, int, bool, int, bool], creds: List[Tuple
 
     if not os.path.isdir(dpath):
         os.makedirs(dpath)
-
-    print(os.path.dirname(os.path.abspath(__file__)))
 
     result.func_result = True
     result.func_data = dcw
