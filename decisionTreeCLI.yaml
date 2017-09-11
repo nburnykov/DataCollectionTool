@@ -24,6 +24,7 @@ clMainClass:
     - expression:
       - 'License UDI:'
       - '28.. Software'
+      - '18.. Software'
       targetClass: clRouterClass
 
     clRouterClass:

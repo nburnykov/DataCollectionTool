@@ -1,9 +1,10 @@
-import datetime
 import re
 from typing import Tuple, Sequence, Dict
-
 from confproc.queryCLI import QueryCLI
 from devproc.deviceConnection import DeviceConnection
+import logging
+
+logger = logging.getLogger('main')
 
 
 class DecisionTreeWalkCLI:
@@ -53,7 +54,6 @@ class DecisionTreeWalkCLI:
                 qlist = qd.getattribute()
                 output = ''
                 for s in qlist:
-                    print(s)
                     output += self._devconn.runcommand(s)
 
                 self._savedqueryresult[q] = output
@@ -108,14 +108,15 @@ class DecisionTreeWalkCLI:
     def _processlogadd(self, msg, cclass=''):
         if cclass == '':
             cclass = self._currentclass
-        self._processlog.append((str(datetime.datetime.now().time()), cclass, msg))
+        self._processlog.append((cclass, msg))
         return
 
     def getpathlist(self) -> Sequence[Tuple[str, str]]:
         return self._pathlist
 
-    def getlog(self) -> Sequence[str]:
-        return self._processlog
+    def getlog(self):
+        for str in self._processlog:
+            logger.debug(str)
 
     def istreeconfigerror(self) -> bool:
         return self._treeconfigerror

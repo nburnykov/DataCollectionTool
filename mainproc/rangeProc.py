@@ -1,5 +1,6 @@
 from typing import List
 from typing import Tuple
+import logging
 
 from yaml import dump
 
@@ -9,6 +10,8 @@ from devproc.devProc import dev_task_threader
 from devproc.portScan import istcpportopen
 from devproc.threader import task_threader
 from parse import confnetparse
+
+logger = logging.getLogger('main')
 
 
 class ScanData:
@@ -45,8 +48,8 @@ class ScanData:
 
 def rangeproc(scandata: ScanData):
 
-    # scanlist = ["10.171.18.0/24", "10.171.2.5"]
-    # dontscanlist = ["10.171.18.0", "10.171.18.255", "10.171.18.1"]
+    logger.info(f'Starting range scan: IP scan range {(" ".join(scandata.scan_list))}, '
+                f'IP deprecated range {(" ".join(scandata.do_not_scan_list))} ')
 
     scanset = confnetparse.composeset(scandata.scan_list)
     dontscanset = confnetparse.composeset(scandata.do_not_scan_list)
@@ -62,7 +65,6 @@ def rangeproc(scandata: ScanData):
             scanlist.append((confnetparse.dectoIP(ip), port, timeout))
 
     portslist = task_threader(scanlist, istcpportopen)
-    print(portslist)
 
     openportslist = []
 
@@ -78,12 +80,13 @@ def rangeproc(scandata: ScanData):
                 openportslist.append((host1, port1,
                                       connection_result1.func_result, port2, connection_result2.func_result))
 
-    print(openportslist)
+    logger.info(f'Found {(len(openportslist))} open ports')
+    logger.debug(f'Open ports:')
+    for port in openportslist:
+        logger.debug(port)
 
     td = yamlload(PROJECTPATH+"\\decisionTreeCLI.yaml")
     qd = yamlload(PROJECTPATH+"\\queriesCLI.yaml")
-
-    print(td, qd)
 
     dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, qd, 50)
 
@@ -98,13 +101,3 @@ def rangeproc(scandata: ScanData):
     with open(PROJECTPATH + '\\_DATA\\' + scandata.scan_name + '\\' + scandata.scan_name + '.yaml', 'w') as data_file:
         data_file.write(dump(conffile))
 
-
-if __name__ == "__main__":
-    sd = ScanData()
-    sd.scan_name = "Test_scan"
-    sd.scan_list = ['10.171.18.0/24', "10.171.2.5", "10.171.64.133", ]
-    sd.do_not_scan_list = ["10.171.18.0", "10.171.18.255"]
-    sd.credential_list = [("cisco", "cisco"), ("ps", "ps1234")]
-    sd.is_scan = True
-    sd.is_parse = True
-    rangeproc(sd)

@@ -1,21 +1,26 @@
 from netmiko import ConnectHandler
+from netmiko.base_connection import BaseConnection
 import telnetlib
 import time
+import logging
+
+logger = logging.getLogger('main')
 
 
 class DeviceConnection:
-    def __init__(self, ip: str, ctype='SSH', commandtimeout=2) -> None:
+    def __init__(self, ip: str, ctype: str ='SSH', commandtimeout: int =2) -> None:
         self.ip = ip
         self.connectiontype = ctype.lower()
         self._commandtimeout = commandtimeout
         self._isconnected = False
-        self._connectionlog = []        # TODO implement logger
         self._tc = None
         self._ssh = None
-        self.login = ''
-        self.password = ''
+        self.login: str = ''
+        self.password: str = ''
 
     def connect(self, login: str, password: str) -> bool:
+
+        logger.debug(f'Connecting to {self.ip}, login {login} via {self.connectiontype}')
 
         self.login = login
         self.password = password
@@ -59,12 +64,14 @@ class DeviceConnection:
                 return self._isconnected
 
         self._isconnected = True
+        logger.debug(f'Connection to {self.ip} successful')
 
         return self._isconnected
 
     def runcommand(self, command: str, timeout=0) -> str:
 
-        print(self.ip, command)
+        logger.debug(f'Executing command on {self.ip}: \'{command}\'')
+
         timeout_ = self._commandtimeout
 
         if timeout > 0:
@@ -83,8 +90,10 @@ class DeviceConnection:
             time.sleep(timeout_)
 
         if self._ssh is not None:
-            output += self._ssh.find_prompt()+'\n'
-            output += self._ssh.send_command(command)
+            host = self._ssh.find_prompt()
+            output += host + '\n'
+            logger.debug(f'Hostname is {host}')
+            output += self._ssh.send_command(command, expect_string=host)
 
         return output
 

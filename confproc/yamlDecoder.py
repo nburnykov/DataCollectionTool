@@ -1,5 +1,8 @@
 from yaml import load, dump
 from typing import Optional, Union, List, Dict
+import logging
+
+logger = logging.getLogger('main')
 
 
 def yamlload(file: str) -> Union[List, Dict]:
@@ -8,6 +11,7 @@ def yamlload(file: str) -> Union[List, Dict]:
         with open(file) as data_file:
             data = load(data_file)
     except IOError:
+        logger.error(f'Can\'t open file {file}')
         data = []
     if data is None:
         data = []

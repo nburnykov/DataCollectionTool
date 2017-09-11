@@ -5,6 +5,9 @@ from constants import PROJECTPATH, DATADIR
 from confproc.yamlDecoder import yamlload
 from typing import Optional, Dict, List, Tuple
 from database.dbhandler import DataBaseHandler
+import logging
+
+logger = logging.getLogger('main')
 
 
 def _find_parser(cli_output_file: str, query_dict: Dict) -> List[Dict]:
@@ -12,7 +15,7 @@ def _find_parser(cli_output_file: str, query_dict: Dict) -> List[Dict]:
     for line in query_dict:
         if 'file' in line:
             if line['file'] == cli_output_file:
-                if 'parsers' in line:
+                if line.get('parsers') is not None:
                     for pr in line['parsers']:
                         res_list.append(pr)
     return res_list
@@ -20,13 +23,12 @@ def _find_parser(cli_output_file: str, query_dict: Dict) -> List[Dict]:
 
 def _get_postprocessors(parser_dict: Dict) -> List[Tuple[str, List[str]]]:
     res_list = []
-    if 'postprocess' in parser_dict:
-        if parser_dict['postprocess'] is not None:
-            for pp in parser_dict['postprocess']:
-                if 'column' and 'processors' in pp:
-                    proc = [str(p).strip() for p in str(pp['processors']).split(',')]
-                    vproc = [p for p in proc if hasattr(parse.postpocessors, p)]
-                    res_list.append((pp['column'], vproc))
+    if parser_dict.get('postprocess') is not None:
+        for pp in parser_dict['postprocess']:
+            if 'column' and 'processors' in pp:
+                proc = [str(p).strip() for p in str(pp['processors']).split(',')]
+                vproc = [p for p in proc if hasattr(parse.postpocessors, p)]
+                res_list.append((pp['column'], vproc))
     return res_list
 
 
@@ -93,11 +95,10 @@ def collected_data_parse(scan_name: str):
                             if len(processor_list) > 0:
                                 parsed_data = _apply_postprocessors(processor_list, parsed_data)
 
-                            if 'table' in parser:
-                                if parser['table'] is not None:
-                                    print(parsed_data[0], parsed_data[1:])
-                                    dbh.add_data(parser['table'], parsed_data[0], parsed_data[1:], dev['IP'])
-
+                            if parser.get('table') is not None:
+                                logger.debug(parsed_data[0])
+                                [logger.debug(line) for line in parsed_data[1:]]
+                                dbh.add_data(parser['table'], parsed_data[0], parsed_data[1:], dev['IP'])
 
                             with open(cli_output_file_fullpath + '.parser_{}.csv'.format(str(i+1)),
                                       'w', newline='') as csv_file:
@@ -105,6 +106,7 @@ def collected_data_parse(scan_name: str):
                                 writer.writerows(parsed_data)
 
     dbh.disconnect()
+    logger.debug('Finish load data to DB')
 
 
 

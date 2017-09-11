@@ -7,12 +7,14 @@ from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
 from confproc.yamlDecoder import yamlload
 from constants import PROJECTPATH
 from devproc.deviceConnection import DeviceConnection
+import logging
 
+logger = logging.getLogger('main')
 
 class ThreadResult:
     def __init__(self) -> None:
         self.func_result = False
-        self.func_data = None  # type: Optional[Callable]
+        self.func_data: Optional[Callable] = None
         self.is_exception_in_thread = False
         self.exception_description = ''
         self.is_stop_queue = False
@@ -85,10 +87,11 @@ class DevThreadWorker(Thread):
             ccresult = check_credentials(dev, self.creds)
 
             if ccresult is None:
+                logger.debug('IP {}, login failed'.format(res_dict['IP']))
                 self.result_list[pos_num] = res_dict
                 self.thread_queue.task_done()
                 continue
-
+            logger.debug('IP {}, login successful'.format(res_dict['IP']))
             res_dict['is login successful'] = True
 
             devdata, tr = ccresult
@@ -96,15 +99,17 @@ class DevThreadWorker(Thread):
             res_dict['port'] = tr.func_data.connectiontype
 
             dcw = DecisionTreeWalkCLI(tr.func_data, self.treedict, self.querydict)
+            dcw.getlog()
 
             if dcw.istreeconfigerror():
                 self.result_list[pos_num] = res_dict
                 self.thread_queue.task_done()
                 continue
 
+            logger.debug('IP {}, device recognized'.format(res_dict['IP']))
             res_dict['is device recognized'] = True
 
-            plist = dcw.getpathlist()  # type: List[str]
+            plist: List[str] = dcw.getpathlist()
 
             dpath = '\\'.join([directory for directory, script in plist])
 
@@ -126,6 +131,7 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
+            logger.debug('IP {}, data collected'.format(res_dict['IP']))
             res_dict['is data collected'] = True
 
             res_dict['filepath'] = _device_query(tr.func_data, query_scheme, dp, self.lock)
@@ -193,8 +199,9 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
                     os.makedirs(pfolder + ffolder)
                 with open(pfolder + fp, 'w') as data_file:
                     data_file.write(result)
+            except IOError:
+                logger.error(f'Can\'t open file {(pfolder + fp)} to write data')
             finally:
-                # TODO add error to log
                 lock.release()
                 flist.append(fp)
     return flist
@@ -234,6 +241,7 @@ def check_credentials(dev: Tuple[str, int, bool, int, bool], creds: List[Tuple[s
     ssh_authenticated = False
     valid_connection = None
 
+    logger.debug(f'IP {ip}, SSH is open: {is_ssh_port_open}, Telnet is open: {is_telnet_port_open}')
     if is_ssh_port_open:
         arglist = [(ip, port, cred) for cred in creds]
         resultlist = _cc_task_threader(arglist, _devconnection_wrapper, 3)

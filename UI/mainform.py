@@ -10,6 +10,9 @@ from functools import partial
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty
 from confproc.yamlDecoder import yamlload, yamldump
 
+import logging
+
+logger = logging.getLogger('main')
 
 class MainForm(BoxLayout):
     sd = ScanData()
@@ -51,7 +54,7 @@ class MainForm(BoxLayout):
 
         self.slist.append({'Scan name': sd.scan_name,
                            'Folder': '_DATA\\' + sd.scan_name})
-        print(self.slist)
+
         yamldump('scans.yaml', list(self.slist))
 
         if not self.is_data_load:
@@ -59,11 +62,11 @@ class MainForm(BoxLayout):
 
     def setscanrange(self, text: str):
         t = text.split("\n")
-        isvalidinput = True
+        is_valid_input = True
         for line in t:
-            isvalidinput &= checkline(line)
+            is_valid_input &= checkline(line)
 
-        if not isvalidinput:
+        if not is_valid_input:
             self.scan_list.background_color = [1, 0.5, 0, 1]
         else:
             self.scan_list.background_color = [1, 1, 1, 1]
@@ -85,7 +88,7 @@ class MainForm(BoxLayout):
         btn.size_hint_y = None
         btn.text = scan_name
         btn.height = "50dp"
-        btn.background_normal = "{}/UI/Images/button_bg.png".format(PROJECTPATH)
+        btn.background_normal = f"{PROJECTPATH}/UI/Images/button_bg.png"
         btn.bind(on_release=partial(self.load_project_data, scan_name))
 
         self.project_list.add_widget(btn)
@@ -93,7 +96,7 @@ class MainForm(BoxLayout):
 
     def load_project_data(self, scan_name: str, *args):
 
-        collected_config = yamlload("{0}/_DATA/{1}/{1}.yaml".format(PROJECTPATH, scan_name))
+        collected_config = yamlload(f"{PROJECTPATH}/_DATA/{scan_name}/{scan_name}.yaml")
         if collected_config.get('Credentials List', None) is not None:
             self.clearcredentials()
             for cred in collected_config['Credentials List']:
@@ -131,4 +134,5 @@ class DataCollectionToolApp(App):
 
 
 def showmainform():
+    logger.debug('Showing application main form')
     DataCollectionToolApp().run()

@@ -1,5 +1,8 @@
 import sqlite3
 from typing import List
+import logging
+
+logger = logging.getLogger('main')
 
 
 class DataBaseHandler:
@@ -9,6 +12,7 @@ class DataBaseHandler:
 
         self._connection = sqlite3.connect(db_name)
         self._cursor = self._connection.cursor()
+        logger.debug(f'Database created: {db_name}')
 
     def _is_database_empty(self) -> bool:
         result = self._cursor.execute("SELECT name FROM sqlite_master WHERE type=\'table\';")
@@ -38,10 +42,12 @@ class DataBaseHandler:
         self._create_table(table_name)
         existed_columns = self._get_column_list(table_name)
 
+        logger.debug(f'Add data to database table {table_name}')
+
         col_diff = [column for column in columns if column not in existed_columns]
         for c in col_diff:
             query = "ALTER TABLE {} ADD COLUMN {} TEXT;".format(table_name, c)
-            print(query)
+            logger.debug(query)
             self._cursor.execute(query)
 
         column_str = '__IP, '+", ".join(columns)
@@ -49,7 +55,7 @@ class DataBaseHandler:
             escaped_row = ["\'" + str(r) + "\'" for r in row]
             row_str = '\'{}\', '.format(ip) + ", ".join(escaped_row)
             query = "INSERT INTO {0} ({1}) VALUES ({2});".format(table_name, column_str, row_str)
-            print(query)
+            logger.debug(query)
             self._cursor.execute(query)
 
         self._connection.commit()
