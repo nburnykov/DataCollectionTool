@@ -108,7 +108,7 @@ class DecisionTreeWalkCLI:
     def _processlogadd(self, msg, cclass=''):
         if cclass == '':
             cclass = self._currentclass
-        self._processlog.append((cclass, msg))
+        self._processlog.append((self._devconn.ip, cclass, msg))
         return
 
     def getpathlist(self) -> Sequence[Tuple[str, str]]:

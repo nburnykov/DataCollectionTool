@@ -21,6 +21,7 @@ MainForm: #
     scan_name: scan_name
     screen1: scr1
     screen_manager: mainsm
+    applog: AppLog
 
 	BoxLayout:                                      # Logo and title
 	    id: header
@@ -437,6 +438,7 @@ MainForm: #
             id: scrlv
             bar_width: "6dp"
             TextInput:
+                id: AppLog
                 size_hint: 1, None
                 background_normal: 'Images/border.png'
                 background_active: 'Images/border.png'
