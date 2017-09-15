@@ -57,13 +57,22 @@ class MainForm(BoxLayout):
 
     def start_scan(self, scan_name: str, scan_range: str, do_not_scan_range: str, is_scan: bool, is_parse: bool):
 
-        #if
-
         self.sd.scan_name = scan_name
         self.sd.scan_list = scan_range.split('\n')
         self.sd.do_not_scan_list = do_not_scan_range.split('\n')
         self.sd.is_scan = is_scan
         self.sd.is_parse = is_parse
+
+        if self.sd.scan_name.strip(' ') == '':
+            logger.info('Scan name is empty! Abort.')
+            return
+        _chars = 0
+        for line in self.sd.scan_list:
+            _chars += len(line.strip(' '))
+
+        if _chars == 0:
+            logger.info('Scan list is empty! Abort.')
+            return
 
         def _scan_thread():
 
@@ -76,8 +85,7 @@ class MainForm(BoxLayout):
 
             if not self.is_data_load:
                 self.add_saved_scan_button(scan_name)
-                self.scan_list.append({'Scan name': self.sd.scan_name,
-                                       'Folder': '_DATA/' + self.sd.scan_name})
+                self.scan_list.append({'Scan name': self.sd.scan_name, 'Folder': '_DATA/' + self.sd.scan_name})
                 self.is_data_load = True
 
             yaml_dump(f'{PROJECTPATH}/scans.yaml', list(self.scan_list))
