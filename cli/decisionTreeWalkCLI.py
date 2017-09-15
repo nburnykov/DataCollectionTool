@@ -17,13 +17,13 @@ class DecisionTreeWalkCLI:
         self._targetclasslist = []
         self._currentclass = 'None'
         self._test_string = ''
-        self._devconn = connection
+        self._devconn: DeviceConnection = connection
 
-        self._decisiontreewalk('clMainClass', treedict)
+        self._decision_tree_walk('clMainClass', treedict)
         if not do_not_disconnect:
             connection.disconnect()
 
-    def _decisiontreewalk(self, currentclass, treedict):
+    def _decision_tree_walk(self, currentclass, treedict):
 
         if currentclass not in treedict:
             self._processlogadd("Target class {} is not found".format(currentclass))
@@ -98,7 +98,7 @@ class DecisionTreeWalkCLI:
                 return
 
             for targetClass in targetclasslist:
-                self._decisiontreewalk(targetClass, dt)
+                self._decision_tree_walk(targetClass, dt)
 
         else:
             self._processlogadd("Query section is not presented, stopping recursive search, "
@@ -115,8 +115,8 @@ class DecisionTreeWalkCLI:
         return self._pathlist
 
     def getlog(self):
-        for str in self._processlog:
-            logger.debug(str)
+        for line in self._processlog:
+            logger.debug(f'{line[0]} {line[1]} {line[2]}')
 
     def istreeconfigerror(self) -> bool:
         return self._treeconfigerror

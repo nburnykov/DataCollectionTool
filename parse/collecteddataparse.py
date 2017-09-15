@@ -2,7 +2,7 @@ import jtextfsm
 import csv
 import parse.postpocessors
 from constants import PROJECTPATH, DATADIR
-from confproc.yamlDecoder import yamlload
+from confproc.fileProc import yaml_load
 from typing import Optional, Dict, List, Tuple
 from database.dbhandler import DataBaseHandler
 import logging
@@ -69,14 +69,14 @@ def collected_data_parse(scan_name: str):
     scandr = PROJECTPATH + '\\' + DATADIR + '\\' + scan_name + '\\'
 
     # TODO try finally
-    maindict = yamlload(scandr + scan_name + ".yaml")
+    maindict = yaml_load(scandr + scan_name + ".yaml")
 
     dbh = DataBaseHandler(scandr + scan_name + ".db")
 
     for dev in maindict['Discovered Data']:
 
         if dev['is data collected']:
-            query_dict = yamlload(PROJECTPATH + '_DeviceQueryScripts\\' + dev['queryscript'])
+            query_dict = yaml_load(PROJECTPATH + '_DeviceQueryScripts\\' + dev['queryscript'])
 
             for fl in dev['filepath']:
                 f = fl.split('\\')[::-1]

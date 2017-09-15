@@ -13,15 +13,14 @@ MainForm: #
 <MainForm>: #
 	orientation: "vertical" #
 
-	scr_mng: scr_mng
-	project_list: boxlist
-	do_not_scan_list: do_not_scan_range
-	scan_list: scan_range
-	credential_data: cred_view
-    scan_name: scan_name
-    screen1: scr1
-    screen_manager: mainsm
-    applog: AppLog
+	project_list: boxListSavedScans
+	form_do_not_scan_list: textEditDoNotScanRange
+	form_scan_list: textEditScanRange
+	credential_data: recycleViewCredentialsList
+    scan_name: textEditScanName
+    screen1: screenManagerMainDialogScreen1
+    screen_manager: screenManagerMainDialog
+    applog: textEditApplicationLog
 
 	BoxLayout:                                      # Logo and title
 	    id: header
@@ -62,17 +61,12 @@ MainForm: #
                 size: self.size
                 size_hint_x: None
 	BoxLayout:                                  # Create project and saved projects
-        id: scr_mng
-        mainsm: mainsm
         height: "350dp"
 	    size_hint_y: None
         ScreenManager:
-            id: mainsm
-            scr1: scr1
-            scr2: scr2
+            id: screenManagerMainDialog
 
             Screen:
-                id: scr0
                 name: 'Instructions'
                 RstDocument:
                     text:
@@ -87,21 +81,15 @@ MainForm: #
                         'To start a new scan click **"New scan"** or load saved scan data -> \n'
                         )
             Screen:
-                id: scr1
-                scr1bl1: scr1bl1
-                scr1bl2: scr1bl2
-                scr1bl3: scr1bl3
+                id: screenManagerMainDialogScreen1
                 name: 'Config_net'
 
                 BoxLayout:
-                    id: scr1blmain
                     orientation: "vertical"
                     BoxLayout:
                         height: "15dp"
                         size_hint_y: None
                     BoxLayout:
-                        id: scr1bl1
-                        scan_name: scan_name
                         height: "30dp"
                         size_hint_y: None
                         BoxLayout:
@@ -119,13 +107,11 @@ MainForm: #
                                 #width: "180dp"
                                 size_hint_x: None
                         TextInput:
-                            id: scan_name
+                            id: textEditScanName
                             size_hint_y: None
                             height: "30dp"
                             focus: True
                     BoxLayout:
-                        id: scr1bl2
-
                         height: "120dp"
                         size_hint_y: None
                         BoxLayout:
@@ -143,13 +129,11 @@ MainForm: #
                                 size: self.size
                                 size_hint_x: None
                         TextInput:
-                            id: scan_range
+                            id: textEditScanRange
                             height: "120dp"
                             on_text:
-                                root.setscanrange(scan_range.text)
+                                root.set_scan_range(textEditScanRange.text)
                     BoxLayout:
-                        id: scr1bl3
-
                         height: "120dp"
                         #size_hint_x: 1
                         size_hint_y: None
@@ -168,13 +152,13 @@ MainForm: #
                                 size: self.size
                                 size_hint_x: None
                         TextInput:
-                            id: do_not_scan_range
+                            id: textEditDoNotScanRange
                             size_hint_x: 3
                             #width: "270dp"
                             height: "120dp"
                             size_hint_y: None
                             on_text:
-                                root.setdonotscanrange(do_not_scan_range.text)
+                                root.set_do_not_scan_range(textEditDoNotScanRange.text)
                     BoxLayout:
                     AnchorLayout:
                         size_hint_y: None
@@ -190,25 +174,22 @@ MainForm: #
                                 text: "< Prev"
                                 size_hint_x: 1
                                 on_release:
-                                    scr1.manager.transition.direction = 'right'
-                                    mainsm.current = 'Instructions'
-                                    #scr1.manager.transition.direction = 'left'
+                                    screenManagerMainDialogScreen1.manager.transition.direction = 'right'
+                                    screenManagerMainDialog.current = 'Instructions'
+                                    #screenManagerMainDialogScreen1.manager.transition.direction = 'left'
                             Button:
                                 text: "Next >"
                                 size_hint_x: 1
                                 on_release:
-                                    scr1.manager.transition.direction = 'left'
-                                    mainsm.current = 'Config_creds'
+                                    screenManagerMainDialogScreen1.manager.transition.direction = 'left'
+                                    screenManagerMainDialog.current = 'Config_creds'
 
 
             Screen:
-                id: scr2
-                scr2bl: scr2bl
+                id: screenManagerMainDialogScreen2
                 name: 'Config_creds'
 
                 BoxLayout:
-                    id: scr2bl
-                    brv: brv
                     orientation: "vertical"
                     BoxLayout: # blank header
                         height: "30dp"
@@ -223,12 +204,10 @@ MainForm: #
                                 size: self.size
                                 size_hint_x: None
                     BoxLayout: # Credential list
-                        id: brv
-                        cred_view: cred_view
                         height: "150dp"
                         size_hint_y: None
                         RecycleView:
-                            id: cred_view
+                            id: recycleViewCredentialsList
                             scroll_type: ['bars', 'content']
                             scroll_wheel_distance: dp(114)
                             bar_width: dp(10)
@@ -262,7 +241,7 @@ MainForm: #
                                 text: "Login"
                                 size: self.size
                         TextInput:
-                            id: login_input
+                            id: textEditLogin
                     BoxLayout: # Password
                         height: "30dp"
                         size_hint_y: None
@@ -274,7 +253,7 @@ MainForm: #
                                 text: "Password"
                                 size: self.size
                         TextInput:
-                            id: passwd_input
+                            id: textEditPassword
                             password: True
                     BoxLayout: # AddButton
                         height: "30dp"
@@ -283,13 +262,14 @@ MainForm: #
                             anchor_y: "center"
                             anchor_x: "right"
                             Button:
+                                id: buttonAddCredentials
                                 text: "Add to list"
                                 size: self.size
                                 size_hint_x: None
                                 on_release:
-                                    root.addcredentials(login_input.text, passwd_input.text)
-                                    login_input.text = ''
-                                    passwd_input.text = ''
+                                    root.add_credentials(textEditLogin.text, textEditPassword.text)
+                                    textEditLogin.text = ''
+                                    textEditPassword.text = ''
                     BoxLayout:
                     AnchorLayout: # Prev and Next buttons
                         #size_hint_x: 100
@@ -306,19 +286,19 @@ MainForm: #
                                 text: "< Prev"
                                 size_hint_x: 1
                                 on_release:
-                                    scr2.manager.transition.direction = 'right'
-                                    mainsm.current = 'Config_net'
-                                    #scr2.manager.transition.direction = 'left'
+                                    screenManagerMainDialogScreen2.manager.transition.direction = 'right'
+                                    screenManagerMainDialog.current = 'Config_net'
+                                    #screenManagerMainDialogScreen2.manager.transition.direction = 'left'
                             Button:
                                 text: "Next >"
                                 size_hint_x: 1
                                 on_release:
-                                    scr2.manager.transition.direction = 'left'
-                                    mainsm.current = 'Progress'
+                                    screenManagerMainDialogScreen2.manager.transition.direction = 'left'
+                                    screenManagerMainDialog.current = 'Progress'
 
 
             Screen:
-                id: scr3
+                id: screenManagerMainDialogScreen3
                 name: 'Progress'
                 BoxLayout:
                     id: scr3bl
@@ -336,7 +316,7 @@ MainForm: #
                             font_size: "13sp"
                             text: "Scan IP range"
                         CheckBox:
-                            id: cb_scan
+                            id: checkBoxDoScan
                             height: "30dp"
                             size_hint_y: None
                             active: True
@@ -344,11 +324,11 @@ MainForm: #
                             font_size: "13sp"
                             text: "Parse data"
                         CheckBox:
-                            id: cb_parse
+                            id: checkBoxDoParse
                             height: "30dp"
                             size_hint_y: None
                     ProgressBar: # Progressbar
-                        id: mainpb
+                        id: progressBarMain
                         size_hint_y: None
                         height: "50dp"
                     BoxLayout:
@@ -366,13 +346,14 @@ MainForm: #
                                 text: "< Prev"
                                 size_hint_x: 1
                                 on_release:
-                                    scr3.manager.transition.direction = 'right'
-                                    mainsm.current = 'Config_creds'
+                                    screenManagerMainDialogScreen3.manager.transition.direction = 'right'
+                                    screenManagerMainDialog.current = 'Config_creds'
                             Button:
                                 text: "Start"
                                 size_hint_x: 1
                                 on_release:
-                                    root.startscan(scan_name.text, scan_range.text, do_not_scan_range.text, cb_scan.active, cb_parse.active)
+                                    root.start_scan(textEditScanName.text, textEditScanRange.text,
+                                    textEditDoNotScanRange.text, checkBoxDoScan.active, checkBoxDoParse.active)
 
 	    BoxLayout:
 	        id: prj_mng
@@ -401,7 +382,7 @@ MainForm: #
                 id: pview
                 bar_width: "6dp"
                 BoxLayout:
-                    id: boxlist
+                    id: boxListSavedScans
                     height: "50dp"
                     size_hint_y: None
                     orientation: "vertical"
@@ -411,8 +392,8 @@ MainForm: #
                         height: "50dp"
                         size_hint_y: None
                         on_release:
-                            scr1.manager.transition.direction = 'left'
-                            mainsm.current = 'Config_net'
+                            screenManagerMainDialogScreen1.manager.transition.direction = 'left'
+                            screenManagerMainDialog.current = 'Config_net'
                             root.new_scan()
 
 
@@ -438,7 +419,7 @@ MainForm: #
             id: scrlv
             bar_width: "6dp"
             TextInput:
-                id: AppLog
+                id: textEditApplicationLog
                 size_hint: 1, None
                 background_normal: 'Images/border.png'
                 background_active: 'Images/border.png'

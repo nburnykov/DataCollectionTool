@@ -1,7 +1,7 @@
 import re
 import datetime
 
-from confproc import yamlDecoder
+from confproc import fileProc
 from SNMP import snmpquery
 
 
@@ -78,10 +78,10 @@ def decisionTreeWalk(dtree, currentclass, hostdata):
                      .format(dt['folder'], dt['genericscript']))
 
 
-dtree = yamlDecoder.yamlload()
+dtree = fileProc.yaml_load()
 
 print(dtree)
-snmpqueries = yamlDecoder.yamlload(file="..\\snmpQueries.json")
+snmpqueries = fileProc.yaml_load(file="..\\snmpQueries.json")
 #decisionTreeWalk(dtree, "clMainClass", hostobj)
 
 #[print("time: {}, class: {}, message: {}".format(l1, l2, l3)) for (l1, l2, l3) in processlog]

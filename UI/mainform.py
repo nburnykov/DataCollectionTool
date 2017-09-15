@@ -7,8 +7,8 @@ from mainproc.rangeProc import rangeproc, ScanData
 from kivy.uix.button import Button
 from constants import PROJECTPATH
 from functools import partial
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty
-from confproc.yamlDecoder import yamlload, yamldump
+from kivy.properties import ObjectProperty
+from confproc.fileProc import yaml_load, yaml_dump
 from threading import Thread
 import time
 from io import StringIO
@@ -16,82 +16,104 @@ from io import StringIO
 import logging
 
 logger = logging.getLogger('main')
+log_stream = StringIO()
+log_handler = logging.StreamHandler(log_stream)
+log_handler.setLevel(logging.DEBUG)
+logger.addHandler(log_handler)
+
 
 class MainForm(BoxLayout):
-    sd = ScanData()
-    slist = ListProperty()
-    is_data_load = BooleanProperty(False)
-
     scan_name = ObjectProperty()
     project_list = ObjectProperty()
     credential_data = ObjectProperty()
-    scan_list = ObjectProperty()
-    do_not_scan_list = ObjectProperty()
+    form_scan_list = ObjectProperty()
+    form_do_not_scan_list = ObjectProperty()
     screen1 = ObjectProperty()
     screen_manager = ObjectProperty()
 
-    log_stream: StringIO = ObjectProperty()
-    log_handler: logging.StreamHandler = ObjectProperty()
-    log_thread = ObjectProperty()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.scan_list = []
+        self.is_data_load = False
+        self.scan_thread: Thread = None
+        self.sd = ScanData()
 
-    def set_scan_list(self, scan_list: List):
-        self.slist = scan_list
+    def disable_buttons(self, disabled: bool) -> None:
+        logger.debug(f'Button.disabled set to {disabled}')
+        for widget in self.walk():
+            if widget.__class__.__name__ == 'Button':
+                widget.disabled = disabled
 
-    def addcredentials(self, login: str, password: str, sd=sd):
+    def set_scan_list(self, scan_list: List) -> None:
+        self.scan_list = scan_list
+
+    def add_credentials(self, login: str, password: str) -> None:
         if login != '':
-            sd.credential_list.append((login, password))
+            self.sd.credential_list.append((login, password))
             self.credential_data.data.insert(0, {'value': login})
 
-    def clearcredentials(self):
+    def clear_credentials(self):
         self.credential_data.data = []
 
-    def startscan(self, scan_name: str, scan_range: str, do_not_scan_range: str, is_scan: bool, is_parse: bool,
-                  sd=sd):
-        sd.scan_name = scan_name
-        sd.scan_list = scan_range.split('\n')
-        sd.do_not_scan_list = do_not_scan_range.split('\n')
-        sd.is_scan = is_scan
-        sd.is_parse = is_parse
+    def start_scan(self, scan_name: str, scan_range: str, do_not_scan_range: str, is_scan: bool, is_parse: bool):
 
-        if sd.is_scan:
-            rangeproc(sd)
+        #if
 
-        if sd.is_parse:
-            collected_data_parse(sd.scan_name)
+        self.sd.scan_name = scan_name
+        self.sd.scan_list = scan_range.split('\n')
+        self.sd.do_not_scan_list = do_not_scan_range.split('\n')
+        self.sd.is_scan = is_scan
+        self.sd.is_parse = is_parse
 
-        self.slist.append({'Scan name': sd.scan_name,
-                           'Folder': '_DATA\\' + sd.scan_name})
+        def _scan_thread():
 
-        yamldump('scans.yaml', list(self.slist))
+            self.disable_buttons(True)
+            if self.sd.is_scan:
+                rangeproc(self.sd)
 
-        if not self.is_data_load:
-            self.add_saved_scan_button(scan_name)
+            if self.sd.is_parse:
+                collected_data_parse(self.sd.scan_name)
 
-    def setscanrange(self, text: str):
+            if not self.is_data_load:
+                self.add_saved_scan_button(scan_name)
+                self.scan_list.append({'Scan name': self.sd.scan_name,
+                                       'Folder': '_DATA/' + self.sd.scan_name})
+                self.is_data_load = True
+
+            yaml_dump(f'{PROJECTPATH}/scans.yaml', list(self.scan_list))
+
+            self.disable_buttons(False)
+
+        self.scan_thread = Thread(target=_scan_thread)
+        self.scan_thread.daemon = True
+        self.scan_thread.start()
+
+    def set_scan_range(self, text: str):
         t = text.split("\n")
         is_valid_input = True
         for line in t:
             is_valid_input &= checkline(line)
 
         if not is_valid_input:
-            self.scan_list.background_color = [1, 0.5, 0, 1]
+            self.form_scan_list.background_color = [1, 0.5, 0, 1]
         else:
-            self.scan_list.background_color = [1, 1, 1, 1]
+            self.form_scan_list.background_color = [1, 1, 1, 1]
 
-    def setdonotscanrange(self, text: str):
+    def set_do_not_scan_range(self, text: str):
         t = text.split("\n")
         isvalidinput = True
         for line in t:
             isvalidinput &= checkline(line)
 
         if not isvalidinput:
-            self.do_not_scan_list.background_color = [1, 0.5, 0, 1]
+            self.form_do_not_scan_list.background_color = [1, 0.5, 0, 1]
         else:
-            self.do_not_scan_list.background_color = [1, 1, 1, 1]
+            self.form_do_not_scan_list.background_color = [1, 1, 1, 1]
 
     def add_saved_scan_button(self, scan_name: str):
 
         btn = Button()
+        btn.id = scan_name
         btn.size_hint_y = None
         btn.text = scan_name
         btn.height = "50dp"
@@ -103,20 +125,20 @@ class MainForm(BoxLayout):
 
     def load_project_data(self, scan_name: str, *args):
 
-        collected_config = yamlload(f"{PROJECTPATH}/_DATA/{scan_name}/{scan_name}.yaml")
+        collected_config = yaml_load(f"{PROJECTPATH}/_DATA/{scan_name}/{scan_name}.yaml")
         if collected_config.get('Credentials List', None) is not None:
-            self.clearcredentials()
+            self.clear_credentials()
             for cred in collected_config['Credentials List']:
-                self.addcredentials(cred[0], cred[1])
+                self.add_credentials(cred[0], cred[1])
 
         if collected_config.get('Scan Name', None) is not None:
             self.scan_name.text = collected_config['Scan Name']
 
         if collected_config.get('Scan List', None) is not None:
-            self.scan_list.text = "\n".join(collected_config['Scan List'])
+            self.form_scan_list.text = "\n".join(collected_config['Scan List'])
 
         if collected_config.get('Do Not Scan List', None) is not None:
-            self.do_not_scan_list.text = "\n".join(collected_config['Do Not Scan List'])
+            self.form_do_not_scan_list.text = "\n".join(collected_config['Do Not Scan List'])
 
         self.screen1.manager.transition.direction = 'left'
         self.screen_manager.current = 'Config_net'
@@ -125,47 +147,38 @@ class MainForm(BoxLayout):
     def new_scan(self):
         self.scan_name.text = ''
         self.credential_data.data = []
-        self.scan_list.text = ''
-        self.do_not_scan_list.text = ''
+        self.form_scan_list.text = ''
+        self.form_do_not_scan_list.text = ''
         self.is_data_load = False
 
     def start_log_listener(self):
 
         def _listen_log_queue():
-
             while True:
-
-                #logger.debug("The time is %s" % time.ctime())
-                self.applog.text += f'{self.log_stream.getvalue()}'
-
+                self.applog.text += f'{log_stream.getvalue()}'
+                log_stream.truncate(0)
+                log_stream.seek(0)
+                log_handler.flush()
                 time.sleep(1)
-
-                self.log_handler.flush()
-                self.log_stream.truncate(0)
-                self.log_stream.seek(0)
 
         self.log_thread = Thread(target=_listen_log_queue)
         self.log_thread.daemon = True
         self.log_thread.start()
+        pass
 
 
 class DataCollectionToolApp(App):
     title = 'Data Collection Tool'
 
     def on_start(self):
-
-        self.root.log_stream = StringIO()
-        self.root.log_handler = logging.StreamHandler(self.root.log_stream)
-        self.root.log_handler.setLevel(logging.DEBUG)
-        logger.addHandler(self.root.log_handler)
         self.root.start_log_listener()
 
-        scan_list = yamlload('scans.yaml')
+        scan_list = yaml_load('scans.yaml')
         self.root.set_scan_list(scan_list)
         for scan in scan_list:
             self.root.add_saved_scan_button(scan['Scan name'])
 
 
-def showmainform():
+def show_main_form():
     logger.debug('Show application main form')
     DataCollectionToolApp().run()

@@ -1,7 +1,5 @@
 import logging
-from UI.mainform import showmainform
-from io import StringIO
-
+from UI.mainform import show_main_form
 
 logger = logging.getLogger('main')
 
@@ -11,17 +9,13 @@ formatter = logging.Formatter(
 streamhandler = logging.StreamHandler()
 streamhandler.setFormatter(formatter)
 streamhandler.setLevel(logging.DEBUG)
+streamhandler.set_name = 'Console'
 logger.addHandler(streamhandler)
-
-vstream = StringIO()
-vstreamhandler = logging.StreamHandler(vstream)
-vstreamhandler.setFormatter(formatter)
-vstreamhandler.setLevel(logging.DEBUG)
-logger.addHandler(vstreamhandler)
 
 filehandler = logging.FileHandler('Application.log')
 filehandler.setFormatter(formatter)
 filehandler.setLevel(logging.DEBUG)
+filehandler.set_name = 'File'
 logger.addHandler(filehandler)
 logger.setLevel(logging.DEBUG)
 
@@ -35,10 +29,10 @@ if __name__ == "__main__":
     if start_ui:
 
         logger.debug('Start UI')
-        showmainform()
+        show_main_form()
 
     else:
         # TODO load scan data from file
         logger.debug('UI disabled, loading config from file')
-        pass
+
 

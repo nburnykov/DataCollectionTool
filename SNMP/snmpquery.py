@@ -1,5 +1,5 @@
 from pysnmp.hlapi import *
-from confproc import yamlDecoder
+from confproc import fileProc
 
 def getsnmpdata(community, host, oid, port=161):
     if oid['type'] == 'single':
@@ -52,7 +52,7 @@ def getoid(queryname):
 oid = {'OID': '1.3.6.1.2.1.1.1.0', 'type': 'single'}
 oid = {'OID': '1.3.6.1.4.1.9.9.23', 'type': 'multiple'}
 
-snmpqueries = yamlDecoder.yamlload(file="..\\snmpQueries.json")
+snmpqueries = fileProc.yaml_load(file="..\\snmpQueries.json")
 print(getsnmpdata('NTM', '10.171.18.203', oid))
 print(getsnmpdata('NTM', '10.171.2.5', oid))
 print(getsnmpdata('public', '10.171.254.105', oid))

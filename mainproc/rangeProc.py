@@ -1,10 +1,7 @@
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 import logging
 
-from yaml import dump
-
-from confproc.yamlDecoder import yamlload
+from confproc.fileProc import yaml_load, yaml_dump
 from constants import PROJECTPATH
 from devproc.devProc import dev_task_threader
 from devproc.portScan import istcpportopen
@@ -81,12 +78,14 @@ def rangeproc(scandata: ScanData):
                                       connection_result1.func_result, port2, connection_result2.func_result))
 
     logger.info(f'Found {(len(openportslist))} open ports')
-    logger.debug(f'Open ports:')
-    for port in openportslist:
-        logger.debug(port)
 
-    td = yamlload(PROJECTPATH+"\\decisionTreeCLI.yaml")
-    qd = yamlload(PROJECTPATH+"\\queriesCLI.yaml")
+    if len(openportslist):
+        logger.info(f'Open ports:')
+    for port in openportslist:
+        logger.info(port)
+
+    td = yaml_load(PROJECTPATH + "/decisionTreeCLI.yaml")
+    qd = yaml_load(PROJECTPATH + "/queriesCLI.yaml")
 
     dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, qd, 50)
 
@@ -98,6 +97,6 @@ def rangeproc(scandata: ScanData):
 
     # TODO crypt passwords and logins
 
-    with open(PROJECTPATH + '\\_DATA\\' + scandata.scan_name + '\\' + scandata.scan_name + '.yaml', 'w') as data_file:
-        data_file.write(dump(conffile))
+    yaml_dump(f'{PROJECTPATH}_DATA/{scandata.scan_name}/{scandata.scan_name}.yaml', conffile)
+
 

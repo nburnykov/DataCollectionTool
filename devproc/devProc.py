@@ -4,7 +4,7 @@ from threading import Thread, Lock
 from typing import Tuple, Sequence, Optional, Callable, List
 
 from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
-from confproc.yamlDecoder import yamlload
+from confproc.fileProc import yaml_load
 from constants import PROJECTPATH
 from devproc.deviceConnection import DeviceConnection
 import logging
@@ -122,8 +122,8 @@ class DevThreadWorker(Thread):
 
                 self.lock.acquire()
 
-                query_scheme = yamlload(PROJECTPATH + "\\_DeviceQueryScripts\\"
-                                        + qname)
+                query_scheme = yaml_load(PROJECTPATH + "\\_DeviceQueryScripts\\"
+                                         + qname)
                 self.lock.release()
             except IOError:
                 self.lock.release()
@@ -200,7 +200,7 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
                 with open(pfolder + fp, 'w') as data_file:
                     data_file.write(result)
             except IOError:
-                logger.error(f'Can\'t open file {(pfolder + fp)} to write data')
+                logger.error(f'Can\'t create file {(pfolder + fp)} to write data')
             finally:
                 lock.release()
                 flist.append(fp)
