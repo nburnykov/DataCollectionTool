@@ -29,7 +29,7 @@
       table: OSPF-NEI
       postprocess:
 
-- command: "show ip route"
+- command: "show ip route vrf *"
   file: "show_ip_route.txt"
   parsers:
     - parser: cisco_ios_show_ip_route.template

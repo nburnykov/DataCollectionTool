@@ -8,8 +8,8 @@ logger = logging.getLogger('main')
 
 
 class DecisionTreeWalkCLI:
-    def __init__(self, connection: DeviceConnection, treedict: dict, querydict: dict, do_not_disconnect=True) -> None:
-        self.querydict = querydict
+    def __init__(self, connection: DeviceConnection, treedict: dict, do_not_disconnect=True) -> None:
+        self.querydict = treedict['queriesCLI']
         self._processlog = []
         self._savedqueryresult = {}
         self._pathlist = []

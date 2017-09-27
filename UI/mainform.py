@@ -74,6 +74,7 @@ class MainForm(BoxLayout):
             logger.info('Scan list is empty! Abort.')
             return
 
+
         def _scan_thread():
 
             self.disable_buttons(True)
@@ -125,6 +126,7 @@ class MainForm(BoxLayout):
         btn.size_hint_y = None
         btn.text = scan_name
         btn.height = "50dp"
+        #print(PROJECTPATH)
         btn.background_normal = f"{PROJECTPATH}/UI/Images/button_bg.png"
         btn.bind(on_release=partial(self.load_project_data, scan_name))
 

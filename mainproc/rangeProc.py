@@ -14,9 +14,9 @@ logger = logging.getLogger('main')
 class ScanData:
     def __init__(self):
         self.scan_name = ''
-        self.scan_list = []         # type: List[str]
-        self.do_not_scan_list = []  # type: List[str]
-        self.credential_list = []   # type: List[Tuple[str, str]]
+        self.scan_list: List[str] = []
+        self.do_not_scan_list: List[str] = []
+        self.credential_list: List[Tuple[str, str]] = []
         self.is_scan = False
         self.is_parse = False
 
@@ -45,8 +45,7 @@ class ScanData:
 
 def rangeproc(scandata: ScanData):
 
-    logger.info(f'Starting range scan: IP scan range {(" ".join(scandata.scan_list))}, '
-                f'IP deprecated range {(" ".join(scandata.do_not_scan_list))} ')
+    logger.info(scandata)
 
     scanset = confnetparse.composeset(scandata.scan_list)
     dontscanset = confnetparse.composeset(scandata.do_not_scan_list)
@@ -85,9 +84,8 @@ def rangeproc(scandata: ScanData):
         logger.info(port)
 
     td = yaml_load(PROJECTPATH + "/decisionTreeCLI.yaml")
-    qd = yaml_load(PROJECTPATH + "/queriesCLI.yaml")
 
-    dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, qd, 50)
+    dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, 50)
 
     conffile = {'Scan Name': scandata.scan_name,
                 'Scan List': scandata.scan_list,

@@ -20,22 +20,23 @@ clMainClass:
 
     parse:
     - expression: 'WS-C'
-      targetClass: clCatSwitchClass
+      targetClass: clSwitchClassCatalyst
     - expression:
       - 'License UDI:'
       - '28.. Software'
       - '18.. Software'
-      targetClass: clRouterClass
+      - '37.. Software'
+      targetClass: clRouterClassISR
 
-    clRouterClass:
+    clRouterClassISR:
 
-      folder: router
-      genericscript: GenericCiscoRouter.yaml
+      folder: routerISR
+      genericscript: CiscoRouterISR.yaml
 
-    clCatSwitchClass:
+    clSwitchClassCatalyst:
 
       folder: catswitch
-      genericscript: CiscoCatSwitch.yaml
+      genericscript: CiscoSwitchCatalyst.yaml
 
   clJuniperClass:
 
@@ -61,6 +62,20 @@ clMainClass:
 
   clLinuxClass:
 
-    hostparse: '(.*)[$#]'
     folder: linux-host
     genericscript: GenericLinuxHost.yaml
+
+queriesCLI:
+- ID: vShowVersion
+  CLI:
+  - "show version"
+  - "display system-information"
+  - "uname -a"
+
+- ID: vCiscoShowVersionExt
+  CLI:
+  - "terminal length 0"
+  - "sh ver"
+
+- ID: vCiscoShowSwitch
+  CLI: "show switch"
