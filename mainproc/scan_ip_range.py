@@ -1,12 +1,12 @@
 from typing import List, Tuple
 import logging
 
-from confproc.fileProc import yaml_load, yaml_dump
-from constants import PROJECTPATH
-from devproc.devProc import dev_task_threader
-from devproc.portScan import istcpportopen
-from devproc.threader import task_threader
-from parse import confnetparse
+from utils.yaml_file_io import yaml_load, yaml_dump
+from constants import PROJECT_PATH
+from devproc.query_device import dev_task_threader
+from devproc.check_port import is_tcp_port_opened
+from utils.threader import task_threader
+from parse import parse_net
 
 logger = logging.getLogger('main')
 
@@ -47,8 +47,8 @@ def rangeproc(scandata: ScanData):
 
     logger.info(scandata)
 
-    scanset = confnetparse.composeset(scandata.scan_list)
-    dontscanset = confnetparse.composeset(scandata.do_not_scan_list)
+    scanset = parse_net.compose_set(scandata.scan_list)
+    dontscanset = parse_net.compose_set(scandata.do_not_scan_list)
 
     scanset ^= dontscanset
 
@@ -58,9 +58,9 @@ def rangeproc(scandata: ScanData):
 
     for ip in scanset:
         for port in [22, 23]:
-            scanlist.append((confnetparse.dectoIP(ip), port, timeout))
+            scanlist.append((parse_net.dec_to_ip(ip), port, timeout))
 
-    portslist = task_threader(scanlist, istcpportopen)
+    portslist = task_threader(scanlist, is_tcp_port_opened)
 
     openportslist = []
 
@@ -83,7 +83,7 @@ def rangeproc(scandata: ScanData):
     for port in openportslist:
         logger.info(port)
 
-    td = yaml_load(PROJECTPATH + "/decisionTreeCLI.yaml")
+    td = yaml_load(PROJECT_PATH + "/decision_tree_cli.yaml")
 
     dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, 50)
 
@@ -95,6 +95,6 @@ def rangeproc(scandata: ScanData):
 
     # TODO crypt passwords and logins
 
-    yaml_dump(f'{PROJECTPATH}_DATA/{scandata.scan_name}/{scandata.scan_name}.yaml', conffile)
+    yaml_dump(f'{PROJECT_PATH}_DATA/{scandata.scan_name}/{scandata.scan_name}.yaml', conffile)
 
 

@@ -22,12 +22,12 @@ def yaml_load(file: str) -> Union[List, Dict]:
 def yaml_dump(file: str, data: Union[List, Dict]) -> Union[List, Dict]:
 
     __writable_data = dump(data)
-    create_dir_write_file(file, __writable_data)
+    writer(file, __writable_data)
 
     return __writable_data
 
 
-def create_dir_write_file(file_name: str, data) -> bool:
+def writer(file_name: str, data) -> bool:
     __dir = os.path.dirname(file_name)
     __result = False
     try:

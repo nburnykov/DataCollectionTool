@@ -14,7 +14,7 @@ class ThreadResult:
 
 
 class ThreadWorker(Thread):
-    def __init__(self, thread_queue: Queue(), thread_func: Callable, result_list: list, lock: Lock) -> None:
+    def __init__(self, thread_queue: Queue, thread_func: Callable, result_list: list, lock: Lock) -> None:
         Thread.__init__(self)
         self.thread_queue = thread_queue
         self.result_list = result_list
@@ -23,17 +23,17 @@ class ThreadWorker(Thread):
 
     def run(self):
         while True:
-            data, pos_num, resultobj = self.thread_queue.get()
+            data, pos_num, result_obj = self.thread_queue.get()
 
             try:
 
-                resultobj.func_result = self.func(*data)
+                result_obj.func_result = self.func(*data)
 
             except Exception as err:
-                resultobj.is_exception_in_thread = True
-                resultobj.exception_description = str(err)
+                result_obj.is_exception_in_thread = True
+                result_obj.exception_description = str(err)
             finally:
-                self.result_list[pos_num] = (data, resultobj, self.name)
+                self.result_list[pos_num] = (data, result_obj, self.name)
                 self.thread_queue.task_done()
 
 

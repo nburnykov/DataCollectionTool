@@ -1,27 +1,30 @@
+# TODO refactor logic
+
+
 class QueryCLI:
     def __init__(self, querydict):
         self.querydict = querydict
-        self.attributepresented = False
-        self.attribute = ''
+        self.attr_presented = False
+        self.attr = ''
 
-    def isattributepresented(self):
-        return self.attributepresented
+    def is_attr_presented(self):
+        return self.attr_presented
 
-    def findattributebyname(self, attribute):
+    def find_attr_by_name(self, attr):
 
-        self.attributepresented = False
-        self.attribute = ''
+        self.attr_presented = False
+        self.attr = ''
         for query in self.querydict:
-            if query['ID'] == attribute:
-                self.attributepresented = True
-                self.attribute = query['CLI']
+            if query['ID'] == attr:
+                self.attr_presented = True
+                self.attr = query['CLI']
 
-        return
+        return self.attr_presented, self.attr
 
-    def getattribute(self):
+    def get_attribute(self):
 
-        if type(self.attribute) is str:
-            return [self.attribute]
+        if type(self.attr) is str:
+            return [self.attr]
         else:
-            return self.attribute
+            return self.attr
 

@@ -1,8 +1,8 @@
 import time
 import unittest
 
-from devproc.devProc import check_credentials
-from devproc.threader import task_threader, ThreadResult
+from devproc.query_device import check_credentials
+from utils.threader import task_threader, ThreadResult
 
 
 class TestThreader(unittest.TestCase):

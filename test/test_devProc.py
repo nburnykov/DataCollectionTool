@@ -2,14 +2,14 @@ import pickle
 import unittest
 
 from confproc.fileProc import yaml_load
-from devproc.devProc import dev_task_threader
+from devproc.query_device import dev_task_threader
 
 
 class TestDevProc(unittest.TestCase):
 
     def setUp(self):
         self.credentials = ["cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
-        self.td = yaml_load("..\\decisionTreeCLI.yaml")
+        self.td = yaml_load("..\\decision_tree_cli.yaml")
         self.qd = yaml_load("..\\queriesCLI.yaml")
         self.q = yaml_load("..\\_DeviceQueryScripts\\CiscoCatSwitch.yaml")
 

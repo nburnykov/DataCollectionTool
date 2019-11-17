@@ -1,5 +1,5 @@
 import unittest
-from database.dbhandler import DataBaseHandler
+from database.db_handler import DataBaseHandler
 
 
 class TestDatabaseHandler(unittest.TestCase):

@@ -1,13 +1,15 @@
 import os
+from os.path import join, isdir
 from queue import Queue
 from threading import Thread, Lock
 from typing import Tuple, Sequence, Optional, Callable, List
 
-from cli.decisionTreeWalkCLI import DecisionTreeWalkCLI
-from confproc.fileProc import yaml_load
-from constants import PROJECTPATH
-from devproc.deviceConnection import DeviceConnection
+from cli.decision_tree_cli import DecisionTreeCLI
+from utils.yaml_file_io import yaml_load
+from devproc.connect_device import DeviceConnection
 import logging
+
+from constants import PROJECT_PATH, DIR_DATA, DIR_DEVICE_QUERY_SCRIPTS
 
 logger = logging.getLogger('main')
 
@@ -22,7 +24,7 @@ class ThreadResult:
 
 
 class CCThreadWorker(Thread):
-    def __init__(self, thread_queue: Queue(), thread_func: Callable, result_list: list, lock: Lock) -> None:
+    def __init__(self, thread_queue: Queue, thread_func: Callable, result_list: list, lock: Lock) -> None:
 
         Thread.__init__(self)
         self.thread_queue = thread_queue
@@ -32,7 +34,7 @@ class CCThreadWorker(Thread):
 
     def run(self):
         while True:
-            data, pos_num, resultobj = self.thread_queue.get()
+            data, pos_num, result_obj = self.thread_queue.get()
 
             self.lock.acquire()
             qstop = self.thread_queue.stop_threads
@@ -40,30 +42,30 @@ class CCThreadWorker(Thread):
 
             try:
                 if not qstop:
-                    self.func(*data, resultobj)
-                    if resultobj.is_stop_queue:
+                    self.func(*data, result_obj)
+                    if result_obj.is_stop_queue:
                         self.lock.acquire()
                         self.thread_queue.stop_threads = True
                         self.lock.release()
                 else:
-                    resultobj.is_stop_queue = True
+                    result_obj.is_stop_queue = True
 
             except Exception as err:
-                resultobj.is_exception_in_thread = True
-                resultobj.exception_description = str(err)
+                result_obj.is_exception_in_thread = True
+                result_obj.exception_description = str(err)
             finally:
-                self.result_list[pos_num] = (data, resultobj, self.name)
+                self.result_list[pos_num] = (data, result_obj, self.name)
                 self.thread_queue.task_done()
 
 
 class DevThreadWorker(Thread):
-    def __init__(self, thread_queue: Queue(), creds: List[Tuple[str, str]], scanname: str, treedict: dict,
+    def __init__(self, thread_queue: Queue, credentials: List[Tuple[str, str]], scan_name: str, tree: dict,
                  result_list: list, lock: Lock) -> None:
 
         Thread.__init__(self)
-        self.creds = creds
-        self.scanname = scanname
-        self.treedict = treedict
+        self.credentials = credentials
+        self.scan_name = scan_name
+        self.tree = tree
         self.thread_queue = thread_queue
         self.result_list = result_list
         self.lock = lock
@@ -74,54 +76,54 @@ class DevThreadWorker(Thread):
             res_dict = {'IP': '',
                         'port': '',
                         'credentials': [],  # type: List[str]
-                        'is login successful': False,
-                        'is device recognized': False,
-                        'is data collected': False,
+                        'is_login_successful': False,
+                        'is_device_recognized': False,
+                        'is_data_collected': False,
                         'filepath': [],  # type: List[str]
                         'queryscript': ''
                         }
 
-            dev, pos_num, resultobj = self.thread_queue.get()
+            dev, pos_num, result_obj = self.thread_queue.get()
 
             res_dict['IP'] = dev[0]
-            ccresult = check_credentials(dev, self.creds)
+            cc_result = check_credentials(dev, self.credentials)
 
-            if ccresult is None:
+            if cc_result is None:
                 logger.debug('IP {}, login failed'.format(res_dict['IP']))
                 self.result_list[pos_num] = res_dict
                 self.thread_queue.task_done()
                 continue
+                
             logger.debug('IP {}, login successful'.format(res_dict['IP']))
-            res_dict['is login successful'] = True
+            res_dict['is_login_successful'] = True
 
-            devdata, tr = ccresult
+            dev_data, tr = cc_result
             res_dict['credentials'] = [tr.func_data.login, tr.func_data.password]
             res_dict['port'] = tr.func_data.connectiontype
 
-            dcw = DecisionTreeWalkCLI(tr.func_data, self.treedict)
-            dcw.getlog()
+            dcw = DecisionTreeCLI(tr.func_data, self.tree)
+            dcw.dump_log()
 
-            if dcw.istreeconfigerror():
+            if dcw.is_tree_config_error():
                 self.result_list[pos_num] = res_dict
                 self.thread_queue.task_done()
                 continue
 
             logger.debug('IP {}, device recognized'.format(res_dict['IP']))
-            res_dict['is device recognized'] = True
+            res_dict['is_device_recognized'] = True
 
-            plist: List[str] = dcw.getpathlist()
+            plist = dcw.get_path_list()
 
-            dpath = '\\'.join([directory for directory, script in plist])
+            dpath = join(*[directory for directory, script in plist])
 
-            dp = self.scanname + '\\' + dpath
+            dp = join(self.scan_name, dpath)
 
             plist.reverse()
             qname = plist[0][1]
 
             self.lock.acquire()
 
-            query_scheme = yaml_load(PROJECTPATH + "/_DeviceQueryScripts/"
-                                     + qname)
+            query_scheme = yaml_load(join(PROJECT_PATH, DIR_DEVICE_QUERY_SCRIPTS, qname))
             self.lock.release()
 
             if not query_scheme:
@@ -129,8 +131,8 @@ class DevThreadWorker(Thread):
                 self.thread_queue.task_done()
                 continue
 
-            logger.debug('IP {}, data collected'.format(res_dict['IP']))
-            res_dict['is data collected'] = True
+            logger.debug(f"IP {res_dict['IP']}, data collected")
+            res_dict['is_data_collected'] = True
 
             res_dict['filepath'] = _device_query(tr.func_data, query_scheme, dp, self.lock)
             res_dict['queryscript'] = qname
@@ -180,38 +182,39 @@ def dev_task_threader(input_arg_list: Sequence[Tuple[str, int, bool, int, bool]]
 
 
 def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str, lock: Lock()) -> List[str]:
-    flist = []
-    pfolder = PROJECTPATH + '\\_DATA\\'
+    f_list = []
+    p_folder = join(PROJECT_PATH, DIR_DATA)
     for item in query_scheme:
-        ffolder = folder + '\\' + connection.ip
+        ffolder = join(folder, connection.ip)
         result = ''
         if 'command' in item:
             result = connection.runcommand(item['command'])
 
         if 'file' in item:
-            fp = ffolder + '\\' + item['file']
+            fp = join(ffolder, item['file'])
             lock.acquire()
             try:
-                if not os.path.isdir(pfolder + ffolder):
-                    os.makedirs(pfolder + ffolder)
-                with open(pfolder + fp, 'w') as data_file:
+                if not isdir(join(p_folder, ffolder)):
+                    os.makedirs(join(p_folder, ffolder))
+                with open(join(p_folder, fp), 'w') as data_file:
                     data_file.write(result)
             except IOError:
-                logger.error(f'Can\'t create file {(pfolder + fp)} to write data')
+                logger.error(f'Can\'t create file {join(p_folder, fp)} to write data')
             finally:
                 lock.release()
-                flist.append(fp)
-    return flist
+                f_list.append(fp)
+    return f_list
 
 
-def _devconnection_wrapper(ip: str, port: int, creds: Tuple[str, str], result: ThreadResult()) -> None:
+def _device_conn_wrapper(ip: str, port: int, credentials: Tuple[str, str], result: ThreadResult()) -> None:
+    conn_type = 'unknown'
     if port == 22:
-        ctype = 'SSH'
-    else:
-        ctype = 'telnet'
+        conn_type = 'SSH'
+    if port == 23:
+        conn_type = 'telnet'
 
-    dc = DeviceConnection(ip, ctype=ctype)
-    login, password = creds
+    dc = DeviceConnection(ip, ctype=conn_type)
+    login, password = credentials
     result.func_result = dc.connect(login=login, password=password)
 
     # TODO if not connected try to reconnect in 1, 3, 7 secs
@@ -233,54 +236,54 @@ def _get_valid_connection(rlist: Sequence[Tuple[Tuple, ThreadResult, str]]) \
 
 def check_credentials(dev: Tuple[str, int, bool, int, bool], creds: List[Tuple[str, str]]) \
         -> Optional[Tuple[Tuple, ThreadResult]]:
-    ip, port, is_ssh_port_open, port2, is_telnet_port_open = dev
+    ip, port_telnet, is_ssh_port_open, port_ssh, is_telnet_port_open = dev
 
     ssh_authenticated = False
     valid_connection = None
 
     logger.debug(f'IP {ip}, SSH is open: {is_ssh_port_open}, Telnet is open: {is_telnet_port_open}')
     if is_ssh_port_open:
-        arglist = [(ip, port, cred) for cred in creds]
-        resultlist = _cc_task_threader(arglist, _devconnection_wrapper, 3)
+        arglist = [(ip, port_telnet, cred) for cred in creds]
+        resultlist = _cc_task_threader(arglist, _device_conn_wrapper, 3)
         valid_connection = _get_valid_connection(resultlist)
 
         if valid_connection is not None:
             ssh_authenticated = True
 
     if not ssh_authenticated and is_telnet_port_open:
-        arglist = [(ip, port2, cred) for cred in creds]
-        resultlist = _cc_task_threader(arglist, _devconnection_wrapper, 3)
+        arglist = [(ip, port_ssh, cred) for cred in creds]
+        resultlist = _cc_task_threader(arglist, _device_conn_wrapper, 3)
         valid_connection = _get_valid_connection(resultlist)
 
     return valid_connection
 
 
-def ident_device(ccresult: Optional[Tuple[Tuple, ThreadResult]], treedict: dict) \
+def identify_device(cc_result: Optional[Tuple[Tuple, ThreadResult]], tree: dict) \
         -> Optional[Sequence[Tuple[str, str]]]:
-    if ccresult is None:
+    if cc_result is None:
         return None
 
-    devdata, tr = ccresult
-    dcw = DecisionTreeWalkCLI(tr.func_data, treedict)
+    dev_data, tr = cc_result
+    dcw = DecisionTreeCLI(tr.func_data, tree)
 
-    return dcw.getpathlist()
+    return dcw.get_path_list()
 
 
-def process_device_wrap(dev: Tuple[str, int, bool, int, bool], creds: List[Tuple[str, str]], treedict: dict,
-                        result: ThreadResult()) -> None:
-    ccresult = check_credentials(dev, creds)
+def query_device(dev: Tuple[str, int, bool, int, bool], credentials: List[Tuple[str, str]], tree: dict,
+                 result: ThreadResult()) -> None:
+    cc_result = check_credentials(dev, credentials)
 
-    if ccresult is None:
+    if cc_result is None:
         result.func_result = False
         return
 
-    devdata, tr = ccresult
-    dcw = DecisionTreeWalkCLI(tr.func_data, treedict)
+    dev_data, tr = cc_result
+    dcw = DecisionTreeCLI(tr.func_data, tree)
 
-    plist = dcw.getpathlist()
-    dpath = '/'.join([directory for directory, script in plist])
+    plist = dcw.get_path_list()
+    dpath = join(*[directory for directory, script in plist])
 
-    if not os.path.isdir(dpath):
+    if not isdir(dpath):
         os.makedirs(dpath)
 
     result.func_result = True

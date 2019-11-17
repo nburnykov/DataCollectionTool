@@ -1,5 +1,5 @@
-import os
+from os.path import dirname, abspath, join
 
-PROJECTPATH = os.path.dirname(os.path.abspath(__package__)) + '/DataCollectionTool/'
-# PROJECTPATH = "C:\\Users\\nikolay.burnykov\\PycharmProjects\\DataCollectionTool\\"
-DATADIR = '_DATA'
+PROJECT_PATH = join(dirname(abspath(__package__)), 'DataCollectionTool')
+DIR_DATA = '_DATA'
+DIR_DEVICE_QUERY_SCRIPTS = '_DeviceQueryScripts'

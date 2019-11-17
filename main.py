@@ -1,5 +1,8 @@
 import logging
-from UI.mainform import show_main_form
+from ui.mainform import show_main_form
+
+# TODO add requirements.txt
+# TODO add readme.md
 
 logger = logging.getLogger('main')
 
@@ -28,11 +31,11 @@ if __name__ == "__main__":
 
     if start_ui:
 
-        logger.debug('Start UI')
+        logger.debug('Start ui')
         show_main_form()
 
     else:
         # TODO load scan data from file
-        logger.debug('UI disabled, loading config from file')
+        logger.debug('ui disabled, loading config from file')
 
 

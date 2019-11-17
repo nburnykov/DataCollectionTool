@@ -1,10 +1,10 @@
 import jtextfsm
 import csv
 import parse.postpocessors
-from constants import PROJECTPATH, DATADIR
-from confproc.fileProc import yaml_load
+from constants import PROJECT_PATH, DIR_DATA
+from utils.yaml_file_io import yaml_load
 from typing import Optional, Dict, List, Tuple
-from database.dbhandler import DataBaseHandler
+from database.db_handler import DataBaseHandler
 import logging
 
 logger = logging.getLogger('main')
@@ -66,7 +66,7 @@ def _parse_cli_output(cli_output_file_fullpath: str, parser_fullpath: str) -> Op
 
 def collected_data_parse(scan_name: str):
 
-    scandr = PROJECTPATH + '\\' + DATADIR + '\\' + scan_name + '\\'
+    scandr = PROJECT_PATH + '\\' + DIR_DATA + '\\' + scan_name + '\\'
 
     # TODO try finally
     maindict = yaml_load(scandr + scan_name + ".yaml")
@@ -76,7 +76,7 @@ def collected_data_parse(scan_name: str):
     for dev in maindict['Discovered Data']:
 
         if dev['is data collected']:
-            query_dict = yaml_load(PROJECTPATH + '_DeviceQueryScripts\\' + dev['queryscript'])
+            query_dict = yaml_load(PROJECT_PATH + '_DeviceQueryScripts\\' + dev['queryscript'])
 
             for fl in dev['filepath']:
                 f = fl.split('\\')[::-1]
@@ -86,8 +86,8 @@ def collected_data_parse(scan_name: str):
 
                     for i, parser in enumerate(parser_list):
 
-                        parser_fullpath = PROJECTPATH + '\\_ParseTemplates\\' + parser['parser']
-                        cli_output_file_fullpath = PROJECTPATH + '_DATA\\' + fl
+                        parser_fullpath = PROJECT_PATH + '\\_ParseTemplates\\' + parser['parser']
+                        cli_output_file_fullpath = PROJECT_PATH + '_DATA\\' + fl
                         parsed_data = _parse_cli_output(cli_output_file_fullpath, parser_fullpath)
 
                         if parsed_data is not None:
