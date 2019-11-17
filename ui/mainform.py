@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from parse.confnetparse import checkline
-from parse.collecteddataparse import collected_data_parse
+from parse.parse_data import collected_data_parse
 from typing import List
 from mainproc.rangeProc import rangeproc, ScanData
 from kivy.uix.button import Button

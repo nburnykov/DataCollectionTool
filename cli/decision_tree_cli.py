@@ -1,6 +1,6 @@
 import re
 from typing import Tuple, Sequence, Dict
-from confproc.queryCLI import QueryCLI
+from utils.cli_query_tree import find_attr_by_name
 from devproc.connect_device import DeviceConnection
 import logging
 
@@ -44,15 +44,12 @@ class DecisionTreeCLI:
                 self._process_log_add(f"{q} result is not found in cache, performing cli command:")
                 self._process_log_add(f"Host: {self._dev_conn.ip}")
 
-                # TODO refactor here
-                qd = QueryCLI(self.query_tree)
-                qd.find_attr_by_name(q)
-                if not qd.is_attr_presented():
+                is_attr_presented, q_list = find_attr_by_name(self.query_tree, q)
+                if not is_attr_presented:
                     self._process_log_add(f"Cannot find \"{q}\" in queries list, please check decision_tree_cli.yaml")
                     self._tree_config_error = True
                     return
 
-                q_list = qd.get_attribute()
                 output = ''
                 for s in q_list:
                     output += self._dev_conn.runcommand(s)
