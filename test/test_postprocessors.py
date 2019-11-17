@@ -1,5 +1,5 @@
 import unittest
-import parse.postpocessors
+import parse.postprocessors
 
 class TestPostProcessors(unittest.TestCase):
 
@@ -16,7 +16,7 @@ class TestPostProcessors(unittest.TestCase):
         for line in input_list:
             test, result = line
             with self.subTest(line=test):
-                self.assertEqual(getattr(parse.postpocessors, 'cisco_iface_name_shorten')(test), result)
+                self.assertEqual(getattr(parse.postprocessors, 'cisco_iface_name_shorten')(test), result)
 
     def test_cisco_route_type_expand(self):
         input_list = [('B', 'BGP'),
@@ -25,7 +25,7 @@ class TestPostProcessors(unittest.TestCase):
         for line in input_list:
             test, result = line
             with self.subTest(line=test):
-                self.assertEqual(getattr(parse.postpocessors, 'cisco_route_type_expand')(test), result)
+                self.assertEqual(getattr(parse.postprocessors, 'cisco_route_type_expand')(test), result)
 
     def test_to_lowercase(self):
         input_list = [('B', 'b'),
@@ -34,7 +34,7 @@ class TestPostProcessors(unittest.TestCase):
         for line in input_list:
             test, result = line
             with self.subTest(line=test):
-                self.assertEqual(getattr(parse.postpocessors, 'to_lowercase')(test), result)
+                self.assertEqual(getattr(parse.postprocessors, 'to_lowercase')(test), result)
 
     def test_digits_only(self):
         input_list =[("['110', None]", "110"),
@@ -44,7 +44,7 @@ class TestPostProcessors(unittest.TestCase):
         for line in input_list:
             test, result = line
             with self.subTest(line=test):
-                self.assertEqual(getattr(parse.postpocessors, 'digits_only')(test), result)
+                self.assertEqual(getattr(parse.postprocessors, 'digits_only')(test), result)
 
     def test_strip_domain(self):
         input_list = [('NB_Lab_L3_1.orange.com', 'NB_Lab_L3_1'),
@@ -54,4 +54,4 @@ class TestPostProcessors(unittest.TestCase):
         for line in input_list:
             test, result = line
             with self.subTest(line=test):
-                self.assertEqual(getattr(parse.postpocessors, 'strip_domain_from_hostname')(test), result)
+                self.assertEqual(getattr(parse.postprocessors, 'strip_domain_from_hostname')(test), result)

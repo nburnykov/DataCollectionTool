@@ -1,9 +1,10 @@
+from typing import Optional, Dict, List, Tuple
+
 import jtextfsm
 import csv
-import parse.postpocessors
+import parse.postprocessors
 from constants import PROJECT_PATH, DIR_DATA
 from utils.yaml_file_io import yaml_load
-from typing import Optional, Dict, List, Tuple
 from database.db_handler import DataBaseHandler
 import logging
 
@@ -27,7 +28,7 @@ def _get_postprocessors(parser_dict: Dict) -> List[Tuple[str, List[str]]]:
         for pp in parser_dict['postprocess']:
             if 'column' and 'processors' in pp:
                 proc = [str(p).strip() for p in str(pp['processors']).split(',')]
-                vproc = [p for p in proc if hasattr(parse.postpocessors, p)]
+                vproc = [p for p in proc if hasattr(parse.postprocessors, p)]
                 res_list.append((pp['column'], vproc))
     return res_list
 
@@ -45,7 +46,7 @@ def _apply_postprocessors(processor_list: List[Tuple[str, List[str]]], parsed_da
         processors = proc[1]
         for parsed_str in parsed_data[1:]:
             for p in processors:
-                parsed_str[index] = getattr(parse.postpocessors, p)(parsed_str[index])
+                parsed_str[index] = getattr(parse.postprocessors, p)(parsed_str[index])
     return parsed_data
 
 

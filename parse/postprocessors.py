@@ -9,16 +9,16 @@ def cisco_iface_name_shorten(long_iface_name: str) -> str:
     return long_iface_name
 
 
-def to_lowercase(input: str) -> str:
-    return input.lower()
+def to_lowercase(input_data: str) -> str:
+    return input_data.lower()
 
 
-def to_uppercase(input: str) -> str:
-    return input.upper()
+def to_uppercase(input_data: str) -> str:
+    return input_data.upper()
 
 
-def strip_whitespaces(input: str) -> str:
-    return input.strip()
+def strip_whitespaces(input_data: str) -> str:
+    return input_data.strip()
 
 
 def cisco_route_type_expand(short_route_type: str) -> str:
@@ -56,12 +56,12 @@ def cisco_route_type_expand(short_route_type: str) -> str:
     return short_route_type
 
 
-def digits_only(input: str) -> str:
-    result = re.search("[^\d]+(\d+).*", str(input))
+def digits_only(input_data: str) -> str:
+    result = re.search("[^\d]+(\d+).*", str(input_data))
     if hasattr(result, 'group'):
         return result.group(1)
     return ''
 
 
-def strip_domain_from_hostname(input: str) -> str:
-    return input.split('.')[0]
+def strip_domain_from_hostname(input_data: str) -> str:
+    return input_data.split('.')[0]
