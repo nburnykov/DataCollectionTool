@@ -8,11 +8,11 @@ logger = logging.getLogger('main')
 
 
 class DeviceConnection:
-    def __init__(self, ip: str, ctype: str ='SSH', commandtimeout: int =2) -> None:
+    def __init__(self, ip: str, connection_type: str = 'ssh', command_timeout: int = 2) -> None:
         self.ip = ip
-        self.connectiontype = ctype.lower()
-        self._commandtimeout = commandtimeout
-        self._isconnected = False
+        self.connection_type = connection_type.lower()
+        self._command_timeout = command_timeout
+        self._connected = False
         self._tc = None
         self._ssh = None
         self.login: str = ''
@@ -20,14 +20,14 @@ class DeviceConnection:
 
     def connect(self, login: str, password: str) -> bool:
 
-        logger.debug(f'Connecting to {self.ip}, login {login} via {self.connectiontype}')
+        logger.debug(f'Connecting to {self.ip}, login {login} via {self.connection_type}')
 
         self.login = login
         self.password = password
 
-        self._isconnected = False
+        self._connected = False
 
-        if self.connectiontype == 'ssh':
+        if self.connection_type == 'ssh':
 
             device = {'device_type': 'cisco_ios',
                       'ip':   self.ip,
@@ -37,12 +37,12 @@ class DeviceConnection:
             try:
                 client = ConnectHandler(**device)
             except Exception:
-                return self._isconnected
+                return self._connected
             self._ssh = client
 
             # TODO handle possible connection exceptions
 
-        if self.connectiontype == 'telnet':
+        if self.connection_type == 'telnet':
 
             # TODO Verify possible problems with telnet and SSH connections like session-limit
 
@@ -54,31 +54,31 @@ class DeviceConnection:
             self._tc.read_until(b":")
             self._tc.write((password + '\n').encode('ascii'))
 
-            time.sleep(self._commandtimeout)
+            time.sleep(self._command_timeout)
             output = str(self._tc.read_very_eager(), 'ascii')
 
             # TODO handle possible connection exceptions
 
             if output[-2].find(":") > -1:
                 self.disconnect()
-                return self._isconnected
+                return self._connected
 
-        self._isconnected = True
+        self._connected = True
         logger.debug(f'Connection to {self.ip} successful')
 
-        return self._isconnected
+        return self._connected
 
-    def runcommand(self, command: str, timeout=0) -> str:
+    def run_command(self, command: str, timeout=0) -> str:
 
         logger.debug(f'Executing command on {self.ip}: \'{command}\'')
 
-        timeout_ = self._commandtimeout
+        timeout_ = self._command_timeout
 
         if timeout > 0:
             timeout_ = timeout
 
         output = ''
-        if not self._isconnected:
+        if not self._connected:
             return output
 
         if self._tc is not None:
@@ -99,33 +99,33 @@ class DeviceConnection:
 
     def disconnect(self) -> None:
 
-        if not self._isconnected:
+        if not self._connected:
             return
         if self._ssh is not None:
             self._ssh.disconnect()
         if self._tc is not None:
             self._tc.close()
 
-    def isconnected(self) -> bool:
+    def connected(self) -> bool:
 
-        self._isconnected = False
+        self._connected = False
 
         if self._tc is not None:
             try:
                 if self._tc.sock:
                     self._tc.sock.send(telnetlib.IAC + telnetlib.NOP)
-                    self._isconnected = True
+                    self._connected = True
             except Exception:
-                self._isconnected = False
+                self._connected = False
 
         if self._ssh is not None:
-            self._isconnected = self._ssh.remote_conn.get_transport().is_alive()
+            self._connected = self._ssh.remote_conn.get_transport().is_alive()
 
-        return self._isconnected
+        return self._connected
 
     def reconnect(self):
 
-        if not self.isconnected():
+        if not self.connected():
             self.connect(self.login, self.password)
 
 

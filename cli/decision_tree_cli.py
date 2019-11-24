@@ -52,7 +52,7 @@ class DecisionTreeCLI:
 
                 output = ''
                 for s in q_list:
-                    output += self._dev_conn.runcommand(s)
+                    output += self._dev_conn.run_command(s)
 
                 self._saved_query_result[q] = output
 

@@ -51,7 +51,7 @@ class CCThreadWorker(Thread):
                     result_obj.is_stop_queue = True
 
             except Exception as err:
-                result_obj.is_exception_in_thread = True
+                result_obj.exception_in_thread = True
                 result_obj.exception_description = str(err)
             finally:
                 self.result_list[pos_num] = (data, result_obj, self.name)
@@ -188,7 +188,7 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
         ffolder = join(folder, connection.ip)
         result = ''
         if 'command' in item:
-            result = connection.runcommand(item['command'])
+            result = connection.run_command(item['command'])
 
         if 'file' in item:
             fp = join(ffolder, item['file'])
@@ -213,14 +213,14 @@ def _device_conn_wrapper(ip: str, port: int, credentials: Tuple[str, str], resul
     if port == 23:
         conn_type = 'telnet'
 
-    dc = DeviceConnection(ip, ctype=conn_type)
+    dc = DeviceConnection(ip, connection_type=conn_type)
     login, password = credentials
     result.func_result = dc.connect(login=login, password=password)
 
     # TODO if not connected try to reconnect in 1, 3, 7 secs
     if result.func_result:
         result.func_data = dc
-        result.is_stop_queue = True
+        result.stop_queue = True
         # else:
         #     dc.disconnect()
 
