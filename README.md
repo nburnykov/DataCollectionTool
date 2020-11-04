@@ -7,3 +7,6 @@ The overall process can be described in the next several steps:
 3. Using decision tree approach determine type and model/OS version of discovered system   
 4. Using linked command set for devices of this model/OS version gather all the data and parse it using linked parsers
 5. Store parsed data in database
+
+#### TODO
+1. requirements.txt
