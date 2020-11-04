@@ -1,10 +1,11 @@
+from os.path import join
 from typing import List, Tuple
 import logging
 
 from utils.yaml_file_io import yaml_load, yaml_dump
-from constants import PROJECT_PATH
-from devproc.query_device import dev_task_threader
-from devproc.check_port import is_tcp_port_opened
+from constants import DIR_PROJECT
+from devproc.device_query import dev_task_threader
+from devproc.port_check import is_tcp_port_opened
 from utils.threader import task_threader
 from parse import parse_net
 
@@ -83,7 +84,7 @@ def rangeproc(scandata: ScanData):
     for port in openportslist:
         logger.info(port)
 
-    td = yaml_load(PROJECT_PATH + "/decision_tree_cli.yaml")
+    td = yaml_load(join(DIR_PROJECT, "decision_tree_cli.yaml"))
 
     dcwlist = dev_task_threader(openportslist, scandata.credential_list, scandata.scan_name, td, 50)
 
@@ -95,6 +96,6 @@ def rangeproc(scandata: ScanData):
 
     # TODO crypt passwords and logins
 
-    yaml_dump(f'{PROJECT_PATH}_DATA/{scandata.scan_name}/{scandata.scan_name}.yaml', conffile)
+    yaml_dump(f'{DIR_PROJECT}_DATA/{scandata.scan_name}/{scandata.scan_name}.yaml', conffile)
 
 
