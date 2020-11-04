@@ -1,7 +1,5 @@
 - command: "ifconfig"
   file: "ifconfig.txt"
-  #parser:
-  #table:
 
 - command: "ps -a"
   file: "ps_-a.txt"
