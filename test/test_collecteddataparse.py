@@ -1,5 +1,5 @@
 import unittest
-from parse.collecteddataparse import collected_data_parse
+from parse.parse_collected_data import collected_data_parse
 
 
 class TestCollectedDataParse(unittest.TestCase):

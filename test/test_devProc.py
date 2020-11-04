@@ -2,7 +2,7 @@ import pickle
 import unittest
 
 from confproc.fileProc import yaml_load
-from devproc.query_device import dev_task_threader
+from devproc.device_query import dev_task_threader
 
 
 class TestDevProc(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestDevProc(unittest.TestCase):
         self.credentials = ["cisco/cisco", "ps/ps1234", "nburnykov/!QAZ2wsx"]
         self.td = yaml_load("..\\decision_tree_cli.yaml")
         self.qd = yaml_load("..\\queriesCLI.yaml")
-        self.q = yaml_load("..\\_DeviceQueryScripts\\CiscoCatSwitch.yaml")
+        self.q = yaml_load("..\\query_scripts\\CiscoCatSwitch.yaml")
 
         with open('./testing_database/openportslist.pickle', 'rb') as f:
             self.portslist = pickle.load(f)

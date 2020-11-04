@@ -1,11 +1,11 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from parse.confnetparse import checkline
-from parse.collecteddataparse import collected_data_parse
+from parse.parse_collected_data import collected_data_parse
 from typing import List
 from mainproc.rangeProc import rangeproc, ScanData
 from kivy.uix.button import Button
-from constants import PROJECT_PATH
+from constants import DIR_PROJECT
 from functools import partial
 from kivy.properties import ObjectProperty
 from confproc.fileProc import yaml_load, yaml_dump
@@ -89,7 +89,7 @@ class MainForm(BoxLayout):
                 self.scan_list.append({'Scan name': self.sd.scan_name, 'Folder': '_DATA/' + self.sd.scan_name})
                 self.is_data_load = True
 
-            yaml_dump(f'{PROJECT_PATH}/scans.yaml', list(self.scan_list))
+            yaml_dump(f'{DIR_PROJECT}/scans.yaml', list(self.scan_list))
 
             self.disable_buttons(False)
 
@@ -127,7 +127,7 @@ class MainForm(BoxLayout):
         btn.text = scan_name
         btn.height = "50dp"
         #print(PROJECTPATH)
-        btn.background_normal = f"{PROJECT_PATH}/UI/Images/button_bg.png"
+        btn.background_normal = f"{DIR_PROJECT}/UI/Images/button_bg.png"
         btn.bind(on_release=partial(self.load_project_data, scan_name))
 
         self.project_list.add_widget(btn)
@@ -135,7 +135,7 @@ class MainForm(BoxLayout):
 
     def load_project_data(self, scan_name: str, *args):
 
-        collected_config = yaml_load(f"{PROJECT_PATH}/_DATA/{scan_name}/{scan_name}.yaml")
+        collected_config = yaml_load(f"{DIR_PROJECT}/_DATA/{scan_name}/{scan_name}.yaml")
         if collected_config.get('Credentials List', None) is not None:
             self.clear_credentials()
             for cred in collected_config['Credentials List']:

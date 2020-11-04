@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from devproc.query_device import check_credentials
+from devproc.device_query import check_credentials
 from utils.threader import task_threader, ThreadResult
 
 
