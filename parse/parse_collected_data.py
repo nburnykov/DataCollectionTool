@@ -1,7 +1,9 @@
+from os.path import join
+
 import jtextfsm
 import csv
-import parse.postpocessors
-from constants import PROJECT_PATH, DIR_DATA
+import parse.post_pocessors
+from constants import DIR_PROJECT, DIR_DATA, DIR_QUERY_SCRIPTS
 from utils.yaml_file_io import yaml_load
 from typing import Optional, Dict, List, Tuple
 from database.db_handler import DataBaseHandler
@@ -27,7 +29,7 @@ def _get_postprocessors(parser_dict: Dict) -> List[Tuple[str, List[str]]]:
         for pp in parser_dict['postprocess']:
             if 'column' and 'processors' in pp:
                 proc = [str(p).strip() for p in str(pp['processors']).split(',')]
-                vproc = [p for p in proc if hasattr(parse.postpocessors, p)]
+                vproc = [p for p in proc if hasattr(parse.post_pocessors, p)]
                 res_list.append((pp['column'], vproc))
     return res_list
 
@@ -45,7 +47,7 @@ def _apply_postprocessors(processor_list: List[Tuple[str, List[str]]], parsed_da
         processors = proc[1]
         for parsed_str in parsed_data[1:]:
             for p in processors:
-                parsed_str[index] = getattr(parse.postpocessors, p)(parsed_str[index])
+                parsed_str[index] = getattr(parse.post_pocessors, p)(parsed_str[index])
     return parsed_data
 
 
@@ -66,17 +68,17 @@ def _parse_cli_output(cli_output_file_fullpath: str, parser_fullpath: str) -> Op
 
 def collected_data_parse(scan_name: str):
 
-    scandr = PROJECT_PATH + '\\' + DIR_DATA + '\\' + scan_name + '\\'
+    scandr = join(DIR_DATA, scan_name)
 
     # TODO try finally
-    maindict = yaml_load(scandr + scan_name + ".yaml")
+    maindict = yaml_load(join(scandr, scan_name + ".yaml"))
 
-    dbh = DataBaseHandler(scandr + scan_name + ".db")
+    dbh = DataBaseHandler(join(scandr, scan_name + ".db"))
 
     for dev in maindict['Discovered Data']:
 
         if dev['is data collected']:
-            query_dict = yaml_load(PROJECT_PATH + '_DeviceQueryScripts\\' + dev['queryscript'])
+            query_dict = yaml_load(join(DIR_QUERY_SCRIPTS, dev['queryscript']))
 
             for fl in dev['filepath']:
                 f = fl.split('\\')[::-1]
@@ -86,8 +88,8 @@ def collected_data_parse(scan_name: str):
 
                     for i, parser in enumerate(parser_list):
 
-                        parser_fullpath = PROJECT_PATH + '\\_ParseTemplates\\' + parser['parser']
-                        cli_output_file_fullpath = PROJECT_PATH + '_DATA\\' + fl
+                        parser_fullpath = DIR_PROJECT + '\\_ParseTemplates\\' + parser['parser']
+                        cli_output_file_fullpath = DIR_PROJECT + '_DATA\\' + fl
                         parsed_data = _parse_cli_output(cli_output_file_fullpath, parser_fullpath)
 
                         if parsed_data is not None:
