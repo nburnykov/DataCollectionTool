@@ -30,7 +30,7 @@ clMainClass:
 
       hostparse: '(.*)[>#]'
       folder: router
-      genericscript: GenericCiscoRouter.yaml
+      genericscript: generic_cisco_router.yaml
 
     clCatSwitchClass:
 
@@ -66,4 +66,4 @@ clMainClass:
 
     hostparse: '(.*)[$#]'
     folder: linux-host
-    genericscript: GenericLinuxHost.yaml
+    genericscript: generic_linux_host.yaml
