@@ -1,5 +1,5 @@
 from os.path import dirname, abspath, join
 
-PROJECT_PATH = join(dirname(abspath(__package__)), 'DataCollectionTool')
-DIR_DATA = '_DATA'
-DIR_DEVICE_QUERY_SCRIPTS = '_DeviceQueryScripts'
+DIR_PROJECT = dirname(abspath(__file__))
+DIR_DATA = join(DIR_PROJECT, 'collected_data')
+DIR_QUERY_SCRIPTS = join(DIR_PROJECT, 'query_scripts')
