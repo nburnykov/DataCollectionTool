@@ -1,7 +1,7 @@
 import re
 from typing import Tuple, Sequence, Dict
 from confproc.queryCLI import QueryCLI
-from devproc.connect_device import DeviceConnection
+from devproc.device_connect import DeviceConnection
 import logging
 
 logger = logging.getLogger('main')
