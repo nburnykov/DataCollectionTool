@@ -1,9 +1,6 @@
 import logging
 from ui.mainform import show_main_form
 
-# TODO add requirements.txt
-# TODO add readme.md
-
 logger = logging.getLogger('main')
 
 formatter = logging.Formatter(
@@ -12,13 +9,13 @@ formatter = logging.Formatter(
 streamhandler = logging.StreamHandler()
 streamhandler.setFormatter(formatter)
 streamhandler.setLevel(logging.DEBUG)
-streamhandler.set_name = 'Console'
+streamhandler.set_name = 'console'
 logger.addHandler(streamhandler)
 
-filehandler = logging.FileHandler('Application.log')
+filehandler = logging.FileHandler('application.log')
 filehandler.setFormatter(formatter)
 filehandler.setLevel(logging.DEBUG)
-filehandler.set_name = 'File'
+filehandler.set_name = 'file'
 logger.addHandler(filehandler)
 logger.setLevel(logging.DEBUG)
 
