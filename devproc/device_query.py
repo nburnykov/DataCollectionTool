@@ -6,10 +6,10 @@ from typing import Tuple, Sequence, Optional, Callable, List
 
 from cli.decision_tree_cli import DecisionTreeCLI
 from utils.yaml_file_io import yaml_load
-from devproc.connect_device import DeviceConnection
+from devproc.device_connect import DeviceConnection
 import logging
 
-from constants import PROJECT_PATH, DIR_DATA, DIR_DEVICE_QUERY_SCRIPTS
+from constants import DIR_PROJECT, DIR_DATA, DIR_QUERY_SCRIPTS
 
 logger = logging.getLogger('main')
 
@@ -123,7 +123,7 @@ class DevThreadWorker(Thread):
 
             self.lock.acquire()
 
-            query_scheme = yaml_load(join(PROJECT_PATH, DIR_DEVICE_QUERY_SCRIPTS, qname))
+            query_scheme = yaml_load(join(DIR_PROJECT, DIR_QUERY_SCRIPTS, qname))
             self.lock.release()
 
             if not query_scheme:
@@ -183,7 +183,6 @@ def dev_task_threader(input_arg_list: Sequence[Tuple[str, int, bool, int, bool]]
 
 def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str, lock: Lock()) -> List[str]:
     f_list = []
-    p_folder = join(PROJECT_PATH, DIR_DATA)
     for item in query_scheme:
         ffolder = join(folder, connection.ip)
         result = ''
@@ -194,12 +193,12 @@ def _device_query(connection: DeviceConnection, query_scheme: dict, folder: str,
             fp = join(ffolder, item['file'])
             lock.acquire()
             try:
-                if not isdir(join(p_folder, ffolder)):
-                    os.makedirs(join(p_folder, ffolder))
-                with open(join(p_folder, fp), 'w') as data_file:
+                if not isdir(join(DIR_DATA, ffolder)):
+                    os.makedirs(join(DIR_DATA, ffolder))
+                with open(join(DIR_DATA, fp), 'w') as data_file:
                     data_file.write(result)
             except IOError:
-                logger.error(f'Can\'t create file {join(p_folder, fp)} to write data')
+                logger.error(f'Can\'t create file {join(DIR_DATA, fp)} to write data')
             finally:
                 lock.release()
                 f_list.append(fp)
