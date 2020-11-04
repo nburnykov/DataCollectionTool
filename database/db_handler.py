@@ -6,7 +6,6 @@ import logging
 logger = logging.getLogger('main')
 
 
-# As we're working with the database with single-user mode so SQL injection is not a case here
 class DataBaseHandler:
     def __init__(self, db_name: str):
         self._connection = None
