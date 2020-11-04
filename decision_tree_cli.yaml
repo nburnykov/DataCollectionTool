@@ -63,7 +63,7 @@ clMainClass:
   clLinuxClass:
 
     folder: linux-host
-    genericscript: GenericLinuxHost.yaml
+    genericscript: generic_linux_host.yaml
 
 queriesCLI:
 - ID: vShowVersion
